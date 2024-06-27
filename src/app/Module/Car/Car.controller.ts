@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { carService } from "./Car.service";
 import { successResponse } from "../../Re-Useable/CustomResponse";
 
-const crateCar: RequestHandler = async (req, res, next) => {
+const createCar: RequestHandler = async (req, res, next) => {
   try {
     const result = await carService.crateCarDB(req.body);
     res.send(successResponse(result, 201, "Car created successfully"));
@@ -27,8 +27,18 @@ const findAllCars: RequestHandler = async (req, res, next) => {
   }
 };
 
+const updateCar: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.updateCarDB(req.params.id, req.body);
+    res.send(successResponse(result, 200, "Car updated successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const carController = {
-  crateCar,
+  createCar,
   findAllCars,
   findOneCar,
+  updateCar,
 };

@@ -10,7 +10,13 @@ router.post(
   "/",
   authMiddleWare(USER_ROLE.admin),
   validationMiddleWare(carZodValidation.carCreateValidationSchemaZod),
-  carController.crateCar
+  carController.createCar
+);
+router.put(
+  "/:id",
+  authMiddleWare(USER_ROLE.admin),
+  validationMiddleWare(carZodValidation.carUpdateValidationSchemaZod),
+  carController.updateCar
 );
 router.get("/", carController.findAllCars);
 router.get("/:id", carController.findOneCar);
