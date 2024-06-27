@@ -30,8 +30,8 @@ const updateCarDB = async (id: string, payload: Partial<TCar>) => {
   const updateData = {
     ...remaining,
     // ...(features && { $addToSet: { features: { $each: features } } }),
-    ...(features && {$addToSet:{features:{$each:features}}})
-  }
+    ...(features && { $addToSet: { features: { $each: features } } }),
+  };
   const result = await CarModel.findByIdAndUpdate(id, updateData, {
     new: true,
     upsert: true,
@@ -43,10 +43,31 @@ const updateCarDB = async (id: string, payload: Partial<TCar>) => {
     throw new AppError(httpStatus.FORBIDDEN, "Car Update failed !");
   }
 };
+const deleteCarDB = async (id: string) => {
+  const isExists = await CarModel.findById(id);
+  if (!isExists) {
+    throw new AppError(404, "No Data Found !");
+  }
+
+  const result = await CarModel.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  if (result) {
+    return result;
+  } else {
+    throw new AppError(httpStatus.FORBIDDEN, "Car Delete failed !");
+  }
+};
 
 export const carService = {
   crateCarDB,
   findAllCarsDB,
   findOneCarDB,
-  updateCarDB
+  updateCarDB,
+  deleteCarDB,
 };

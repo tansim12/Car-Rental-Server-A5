@@ -18,6 +18,7 @@ router.put(
   validationMiddleWare(carZodValidation.carUpdateValidationSchemaZod),
   carController.updateCar
 );
+router.delete("/:id", authMiddleWare(USER_ROLE.admin), carController.deleteCar);
 router.get("/", carController.findAllCars);
 router.get("/:id", carController.findOneCar);
 

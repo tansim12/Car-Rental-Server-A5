@@ -35,10 +35,19 @@ const updateCar: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const deleteCar: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.deleteCarDB(req.params.id);
+    res.send(successResponse(result, 200, "Car Deleted successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const carController = {
   createCar,
   findAllCars,
   findOneCar,
   updateCar,
+  deleteCar,
 };
