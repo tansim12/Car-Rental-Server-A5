@@ -11,7 +11,7 @@ normalMiddleware(app);
 // "/api/";
 
 app.use("/api/auth", authRoutes);
-app.use("/api", carRoutes);
+app.use("/api/cars", carRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Level-2 setup ");
