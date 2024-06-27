@@ -1,14 +1,15 @@
 import express, { Application, Request, Response } from "express";
 import globalErrorHandler from "../src/app/Error-Handle/globalErrorHandle";
 import normalMiddleware from "../src/app/middleware/normalMiddleware";
-import { userRoutes } from "./app/Module/User/User.route";
+import { authRoutes } from "./app/Module/Auth/Auth.route";
+// import { userRoutes } from "./app/Module/User/User.route";
 
 const app: Application = express();
 normalMiddleware(app);
 
 // "/api/";
 
-app.use("/api/auth", userRoutes);
+app.use("/api/auth", authRoutes);
 
 
 

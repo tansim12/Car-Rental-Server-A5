@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const signinValidationSchemaZod = z.object({
+const signInValidationSchemaZod = z.object({
   body: z.object({
     email: z
       .string()
@@ -11,5 +11,5 @@ const signinValidationSchemaZod = z.object({
 });
 
 export const authZodValidation = {
-  signinValidationSchemaZod,
+    signInValidationSchemaZod,
 };
