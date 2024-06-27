@@ -12,6 +12,10 @@ const carCreateValidationSchemaZod = z.object({
     pricePerHour: z
       .number()
       .positive("Price per hour must be a positive number"),
+    status: z
+      .enum(["available", "unavailable", "maintenance"])
+      .default("available"),
+    isDeleted: z.boolean().default(false),
   }),
 });
 

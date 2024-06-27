@@ -5,4 +5,6 @@ export interface TCar {
   isElectric: boolean;
   features: string[];
   pricePerHour: number;
+  status?: "available" | "unavailable";
+  isDeleted?: boolean;
 }

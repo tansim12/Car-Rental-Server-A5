@@ -27,6 +27,15 @@ const carSchema = new Schema<TCar>(
       type: Number,
       required: true,
     },
+    status: {
+        type: String,
+        enum: ["available", "unavailable"],
+        default: "available",
+      },
+    isDeleted:{
+        type:Boolean,
+        default:false
+    }
   },
   {
     timestamps: true,
