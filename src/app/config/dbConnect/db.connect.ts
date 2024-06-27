@@ -8,7 +8,7 @@ const uri = `mongodb+srv://${process.env.USER}:${process.env.PASS}@cluster0.qmiv
 const dbConnect = async () => {
   try {
     await mongoose
-      .connect(uri as string, { dbName: "contestPlatform" })
+      .connect(uri as string, { dbName: process.env.DB_NAME })
       .then(() => {
         console.log("connect by setup mongoose");
       });
