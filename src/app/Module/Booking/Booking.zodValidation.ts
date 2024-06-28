@@ -11,16 +11,20 @@ const timeStringSchema = z.string().refine(
   }
 );
 
+// Define a Zod schema for the date format (YYYY-MM-DD)
+const dateSchema = z.string().refine(
+  (date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(new Date(date).getTime()), 
+  {
+    message: "Invalid date format. Expected format is YYYY-MM-DD",
+  }
+);
+
 const bookingCreatingValidationSchemaZod = z.object({
   body: z.object({
     car: z.string().refine((val) => Types.ObjectId.isValid(val), {
       message: "Invalid car ID",
     }),
-    date: z
-      .string({
-        required_error: "Date is required",
-        invalid_type_error: "Date Should Be String",
-      })
+    date:dateSchema
 
       .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid date format",

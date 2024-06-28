@@ -18,7 +18,7 @@ export const authMiddleWare = (...requiredRoles: TUserRole[]) => {
     try {
       const token = req.headers.authorization;
       if (!token) {
-        return handleUnauthorizedError("You are not authorized !!!", next);
+        return handleUnauthorizedError("You have no access to this route", next);
       }
 
       const decoded = jwt.verify(
@@ -33,7 +33,7 @@ export const authMiddleWare = (...requiredRoles: TUserRole[]) => {
       }
 
       if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
-        return handleUnauthorizedError("You are not authorized !!!", next);
+        return handleUnauthorizedError("You have no access to this route", next);
       }
       const data = {
         id: user?._id,
@@ -42,7 +42,7 @@ export const authMiddleWare = (...requiredRoles: TUserRole[]) => {
       req.user = data;
       next();
     } catch (error) {
-      return handleUnauthorizedError("You are not authorized !!!", next);
+      return handleUnauthorizedError("You have no access to this route", next);
     }
   };
 };

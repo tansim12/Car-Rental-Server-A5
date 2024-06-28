@@ -13,7 +13,7 @@ normalMiddleware(app);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
-app.use("/api", bookingRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Level-2 setup ");

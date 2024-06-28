@@ -23,16 +23,16 @@ const findAllCarsDB = async () => {
 
 const updateCarDB = async (id: string, payload: Partial<TCar>) => {
   // todo update features update system 
-  const { features, ...remaining } = payload;
+  // const { features, ...remaining } = payload;
   const isExists = await CarModel.findById(id);
   if (!isExists) {
     throw new AppError(404, "No Data Found !");
   }
-  const updateData = {
-    ...remaining,
-    ...(features && { $addToSet: { features: { $each: features } } }),
-  };
-  const result = await CarModel.findByIdAndUpdate(id, updateData, {
+  // const updateData = {
+  //   ...remaining,
+  //   ...(features && { $addToSet: { features: { $each: features } } }),
+  // };
+  const result = await CarModel.findByIdAndUpdate(id, payload, {
     new: true,
     upsert: true,
     runValidators: true,

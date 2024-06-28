@@ -7,7 +7,7 @@ import { bookingsController } from "./Booking.Controller";
 const router = express.Router();
 
 router.post(
-  "/bookings",
+  "/",
   authMiddleWare(USER_ROLE.user),
   validationMiddleWare(bookingZodValidation.bookingCreatingValidationSchemaZod),
   bookingsController.createBookings
@@ -19,7 +19,11 @@ router.post(
 //   carController.updateCar
 // );
 // router.delete("/:id", authMiddleWare(USER_ROLE.admin), carController.deleteCar);
-// router.get("/", carController.findAllCars);
+router.get(
+  "/",
+  authMiddleWare(USER_ROLE.admin),
+  bookingsController.findAllBookings
+);
 // router.get("/:id", carController.findOneCar);
 
 export const bookingRoutes = router;

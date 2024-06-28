@@ -13,6 +13,15 @@ const createBookings: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const findAllBookings: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.findAllBookingsDB(req.query);
+    res.send(successResponse(result, 200, "Bookings retrieved successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
 export const bookingsController = {
   createBookings,
+  findAllBookings,
 };

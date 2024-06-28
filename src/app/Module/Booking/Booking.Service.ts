@@ -4,6 +4,7 @@ import { CarModel } from "../Car/Car.model";
 import { TBookings } from "./Booking.interface";
 import mongoose from "mongoose";
 import { BookingModel } from "./Booking.model";
+import QueryBuilder from "../../Builder/QueryBuilder";
 
 const createBookingsDB = async (
   payload: Partial<TBookings>,
@@ -55,6 +56,32 @@ const createBookingsDB = async (
   }
 };
 
+const findAllBookingsDB = async (queryParams: Partial<TBookings>) => {
+  const { car, date } = queryParams;
+  const checkDataFormate = (d: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d).getTime());
+
+  if (date && !checkDataFormate(date)) {
+    throw new AppError(
+      400,
+      `Date formate should be YYYY-MM-DD . You have ${date}`
+    );
+  }
+  if (car) {
+    const carIsExists = await CarModel.findById({ _id: car });
+    if (!carIsExists) {
+      throw new AppError(404, "Data Not Found !");
+    }
+  }
+  const carQuery = new QueryBuilder(
+    BookingModel.find().populate("car user"),
+    queryParams
+  ).filter();
+  const result = await carQuery.modelQuery;
+  return result;
+};
+
 export const bookingsService = {
   createBookingsDB,
+  findAllBookingsDB,
 };
