@@ -24,6 +24,10 @@ router.get(
   authMiddleWare(USER_ROLE.admin),
   bookingsController.findAllBookings
 );
-// router.get("/:id", carController.findOneCar);
+router.get(
+  "/my-bookings",
+  authMiddleWare(USER_ROLE.user),
+  bookingsController.findOneMyBookings
+);
 
 export const bookingRoutes = router;

@@ -103,8 +103,12 @@ const findAllBookingsDB = async (queryParams: Partial<TBookings>) => {
 };
 
 const findOneMyBookingsDB = async (id: string) => {
-  const result = await BookingModel.find({ id }).populate("user car");
-  return result;
+  const result = await BookingModel.find({ user: id }).populate("user car");
+  if (result.length) {
+    return result;
+  } else {
+    throw new AppError(404, "Data Not Found !");
+  }
 };
 
 export const bookingsService = {

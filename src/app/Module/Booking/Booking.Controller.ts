@@ -21,7 +21,18 @@ const findAllBookings: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const findOneMyBookings: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.findOneMyBookingsDB(req.user?.id);
+    res.send(
+      successResponse(result, 200, "My Bookings retrieved successfully")
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 export const bookingsController = {
   createBookings,
   findAllBookings,
+  findOneMyBookings,
 };
