@@ -16,7 +16,8 @@ const handleUnauthorizedError = (message: string, next: NextFunction) => {
 export const authMiddleWare = (...requiredRoles: TUserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const token = req.headers.authorization;
+      const token = req.headers.authorization?.split(" ")[1];
+      
       if (!token) {
         return handleUnauthorizedError("You have no access to this route", next);
       }

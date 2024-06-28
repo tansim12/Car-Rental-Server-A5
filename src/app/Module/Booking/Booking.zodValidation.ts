@@ -21,7 +21,7 @@ const dateSchema = z.string().refine(
 
 const bookingCreatingValidationSchemaZod = z.object({
   body: z.object({
-    car: z.string().refine((val) => Types.ObjectId.isValid(val), {
+    carId: z.string().refine((val) => Types.ObjectId.isValid(val), {
       message: "Invalid car ID",
     }),
     date:dateSchema
