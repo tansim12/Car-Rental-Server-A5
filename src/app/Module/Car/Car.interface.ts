@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export interface TCar {
   name: string;
   description: string;
@@ -7,4 +9,9 @@ export interface TCar {
   pricePerHour: number;
   status?: "available" | "unavailable";
   isDeleted?: boolean;
+}
+
+export interface TCarReturn {
+  bookingId: Types.ObjectId;
+  endTime: string;
 }

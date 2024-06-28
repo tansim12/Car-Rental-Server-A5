@@ -44,10 +44,19 @@ const deleteCar: RequestHandler = async (req, res, next) => {
   }
 };
 
+const carReturn: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.carReturnDB(req.body);
+    res.send(successResponse(result, 200, "Car returned successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
 export const carController = {
   createCar,
   findAllCars,
   findOneCar,
   updateCar,
   deleteCar,
+  carReturn,
 };

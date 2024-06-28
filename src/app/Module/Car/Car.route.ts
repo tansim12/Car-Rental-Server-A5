@@ -13,6 +13,12 @@ router.post(
   carController.createCar
 );
 router.put(
+  "/return",
+  authMiddleWare(USER_ROLE.admin),
+  validationMiddleWare(carZodValidation.carReturnSchemaZod),
+  carController.carReturn
+);
+router.put(
   "/:id",
   authMiddleWare(USER_ROLE.admin),
   validationMiddleWare(carZodValidation.carUpdateValidationSchemaZod),

@@ -1,4 +1,15 @@
+import { Types } from "mongoose";
 import { z } from "zod";
+
+const timeStringSchema = z.string().refine(
+  (time) => {
+    const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
+    return regex.test(time);
+  },
+  {
+    message: 'Invalid time format, expected "HH:MM" in 24 hours format',
+  }
+);
 
 const carCreateValidationSchemaZod = z.object({
   body: z.object({
@@ -42,7 +53,19 @@ const carUpdateValidationSchemaZod = z.object({
   }),
 });
 
+const carReturnSchemaZod = z.object({
+  body: z.object({
+    bookingId: z.string({
+      required_error:"Booking Id Required "
+    }).refine((val) => Types.ObjectId.isValid(val), {
+      message: "Invalid car ID",
+    }),
+    endTime: timeStringSchema,
+  }),
+});
+
 export const carZodValidation = {
   carCreateValidationSchemaZod,
   carUpdateValidationSchemaZod,
+  carReturnSchemaZod,
 };
