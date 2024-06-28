@@ -9,6 +9,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const singUpDB = async (payload: Partial<TUser>) => {
+  const user = await UserModel.findOne({ email: payload?.email }).select("email");
+  if (user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Already Exists");
+  }
   const result = await UserModel.create(payload);
   return result;
 };
