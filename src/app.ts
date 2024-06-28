@@ -3,6 +3,7 @@ import globalErrorHandler from "../src/app/Error-Handle/globalErrorHandle";
 import normalMiddleware from "../src/app/middleware/normalMiddleware";
 import { authRoutes } from "./app/Module/Auth/Auth.route";
 import { carRoutes } from "./app/Module/Car/Car.route";
+import { bookingRoutes } from "./app/Module/Booking/Booking.route";
 // import { userRoutes } from "./app/Module/User/User.route";
 
 const app: Application = express();
@@ -12,6 +13,7 @@ normalMiddleware(app);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
+app.use("/api", bookingRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Level-2 setup ");

@@ -1,0 +1,18 @@
+import { RequestHandler } from "express";
+import { bookingsService } from "./Booking.Service";
+import { successResponse } from "../../Re-Useable/CustomResponse";
+
+const createBookings: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.createBookingsDB(
+      req.body,
+      req.user?.id
+    );
+    res.send(successResponse(result, 200, "Car booked successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+export const bookingsController = {
+  createBookings,
+};

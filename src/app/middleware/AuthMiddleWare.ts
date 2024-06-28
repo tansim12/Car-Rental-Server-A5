@@ -35,8 +35,11 @@ export const authMiddleWare = (...requiredRoles: TUserRole[]) => {
       if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
         return handleUnauthorizedError("You are not authorized !!!", next);
       }
-
-      req.user = decoded.data;
+      const data = {
+        id: user?._id,
+        role: decoded?.data?.role,
+      };
+      req.user = data;
       next();
     } catch (error) {
       return handleUnauthorizedError("You are not authorized !!!", next);

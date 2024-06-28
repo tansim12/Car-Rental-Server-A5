@@ -22,6 +22,7 @@ const findAllCarsDB = async () => {
 };
 
 const updateCarDB = async (id: string, payload: Partial<TCar>) => {
+  // todo update features update system 
   const { features, ...remaining } = payload;
   const isExists = await CarModel.findById(id);
   if (!isExists) {
@@ -29,7 +30,6 @@ const updateCarDB = async (id: string, payload: Partial<TCar>) => {
   }
   const updateData = {
     ...remaining,
-    // ...(features && { $addToSet: { features: { $each: features } } }),
     ...(features && { $addToSet: { features: { $each: features } } }),
   };
   const result = await CarModel.findByIdAndUpdate(id, updateData, {
