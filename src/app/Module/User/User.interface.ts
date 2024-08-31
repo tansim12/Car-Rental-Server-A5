@@ -9,6 +9,7 @@ export interface TUser {
   address?: string;
   image?: string;
   status?: "active" | "block";
+  passwordChangeAt?:Date
   isDelete?: boolean;
 }
 export type TUserRole = keyof typeof USER_ROLE;

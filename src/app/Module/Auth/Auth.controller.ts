@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { authService } from "./Auth.service";
 import { successResponse } from "../../Re-Useable/CustomResponse";
+import httpStatus from "http-status";
 
 const singUp: RequestHandler = async (req, res, next) => {
   try {
@@ -34,7 +35,19 @@ const signIn: RequestHandler = async (req, res, next) => {
   }
 };
 
+const refreshToken: RequestHandler = async (req, res, next) => {
+  try { 
+    const result = await authService.refreshTokenDB(req?.cookies.refreshToken);  
+    res
+      .status(200)
+      .send(successResponse(result,httpStatus.OK, "Refresh Token send Successfully done "));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const authController = {
   signIn,
   singUp,
+  refreshToken
 };

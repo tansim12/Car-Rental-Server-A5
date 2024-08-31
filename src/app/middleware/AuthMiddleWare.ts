@@ -31,19 +31,32 @@ export const authMiddleWare = (...requiredRoles: TUserRole[]) => {
         process.env.SECRET_ACCESS_TOKEN as string
       ) as JwtPayload;
       const { role, id } = decoded.data;
+      const { iat } = decoded;
       const user = await UserModel.findById(id).select("+password");
 
       if (!user) {
         return next(new AppError(httpStatus.NOT_FOUND, "User not found"));
       }
       if (user?.isDelete) {
-        return next(new AppError(httpStatus.BAD_REQUEST, "This User Already Deleted !"))
+        return next(
+          new AppError(httpStatus.BAD_REQUEST, "This User Already Deleted !")
+        );
       }
 
       if (user?.status === USER_STATUS.block) {
-        return next(new AppError(httpStatus.BAD_REQUEST, "This User Blocked !"))
+        return next(
+          new AppError(httpStatus.BAD_REQUEST, "This User Blocked !")
+        );
       }
+      const passwordChangeConvertMilliSecond =
+        new Date(user?.passwordChangeAt as Date).getTime() / 1000;
+      const jwtIssueTime = iat as number;
 
+      if (passwordChangeConvertMilliSecond > jwtIssueTime) {
+        return next(
+          new AppError(httpStatus.UNAUTHORIZED, "You are not authorized !")
+        );
+      }
       if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
         return handleUnauthorizedError(
           "You have no access to this route",

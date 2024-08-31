@@ -43,6 +43,9 @@ const userSchema = new Schema<TUser>(
     image: {
       type: String,
     },
+    passwordChangeAt: {
+      type: Date,
+    },
     isDelete: {
       type: Boolean,
       default: false,
