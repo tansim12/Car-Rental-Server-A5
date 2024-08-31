@@ -36,11 +36,32 @@ const signIn: RequestHandler = async (req, res, next) => {
 };
 
 const refreshToken: RequestHandler = async (req, res, next) => {
-  try { 
-    const result = await authService.refreshTokenDB(req?.cookies.refreshToken);  
+  try {
+    const result = await authService.refreshTokenDB(req?.cookies.refreshToken);
     res
-      .status(200)
-      .send(successResponse(result,httpStatus.OK, "Refresh Token send Successfully done "));
+      .send(
+        successResponse(
+          result,
+          httpStatus.OK,
+          "Refresh Token send Successfully done "
+        )
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const changePassword: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await authService.changePasswordDB(req?.user?.id, req.body);
+    res
+      .send(
+        successResponse(
+          result,
+          httpStatus.OK,
+          "Password Change Successfully done "
+        )
+      );
   } catch (error) {
     next(error);
   }
@@ -49,5 +70,6 @@ const refreshToken: RequestHandler = async (req, res, next) => {
 export const authController = {
   signIn,
   singUp,
-  refreshToken
+  refreshToken,
+  changePassword,
 };

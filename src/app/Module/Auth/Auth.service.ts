@@ -3,13 +3,14 @@ import AppError from "../../Error-Handle/AppError";
 import { validateLoginPassword } from "../../Re-Useable/BcryptValidatin";
 import { TUser } from "../User/User.interface";
 import { UserModel } from "../User/User.model";
-import { TSignIn } from "./Auth.interface";
+import { TChangePassword, TSignIn } from "./Auth.interface";
 import { dynamicTokenGenerate } from "./Auth.utils";
 import dotenv from "dotenv";
+dotenv.config();
 import { USER_STATUS } from "../User/User.const";
 import { JwtPayload } from "jsonwebtoken";
-dotenv.config();
 import jwt from "jsonwebtoken";
+import Bcrypt from "bcrypt";
 
 const singUpDB = async (payload: Partial<TUser>) => {
   const user = await UserModel.findOne({
@@ -109,7 +110,7 @@ const refreshTokenDB = async (token: string) => {
   const { id } = (decoded as JwtPayload).data;
   const { iat } = decoded as JwtPayload;
 
-  const user = await UserModel.findOne({ id }).select("+password");
+  const user = await UserModel.findById(id).select("+password");
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found !");
   }
@@ -148,8 +149,61 @@ const refreshTokenDB = async (token: string) => {
   return { accessToken };
 };
 
+const changePasswordDB = async (id: string, payload: TChangePassword) => {
+  const { oldPassword, newPassword } = payload;
+
+  // validation is exists
+  const user = await UserModel.findById(id).select("+password");
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found !");
+  }
+  // validate isExistsUserDeleted
+  const isExistsUserDeleted = user?.isDelete;
+  if (isExistsUserDeleted) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Deleted !");
+  }
+  const isExistsUserStatus = user?.status;
+  if (isExistsUserStatus === USER_STATUS?.block) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Blocked !");
+  }
+  // check password is correct
+  const checkPassword = await validateLoginPassword(
+    oldPassword,
+    user?.password
+  );
+  if (!checkPassword) {
+    throw new AppError(
+      400,
+      "Old Password dose not matched... Try again letter 😥"
+    );
+  }
+  // updating user model needPassword change false and password bcrypt
+  let newPasswordBcrypt;
+  if (checkPassword) {
+    newPasswordBcrypt = await Bcrypt.hash(
+      newPassword,
+      Number(process.env.BCRYPT_NUMBER)
+    );
+  }
+  if (!newPasswordBcrypt) {
+    throw new AppError(400, "Password Not Change here");
+  }
+  const result = await UserModel.findByIdAndUpdate(id, {
+    password: newPasswordBcrypt,
+    passwordChangeAt: new Date(),
+  });
+
+  if (result) {
+    return null;
+  } else {
+    throw new AppError(400, "Password Not Change here");
+  }
+};
+
 export const authService = {
   signInDB,
   singUpDB,
   refreshTokenDB,
+  changePasswordDB,
 };

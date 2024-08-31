@@ -29,5 +29,6 @@ const refreshTokenValidationSchemaZod = z.object({
 
 export const authZodValidation = {
     signInValidationSchemaZod,
-    refreshTokenValidationSchemaZod
+    refreshTokenValidationSchemaZod,
+    changePasswordValidationSchemaZod
 };
