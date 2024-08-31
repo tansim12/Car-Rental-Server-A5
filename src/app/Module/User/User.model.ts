@@ -17,7 +17,15 @@ const userSchema = new Schema<TUser>(
       type: String,
       enum: ["user", "admin"],
       required: true,
+      default: "user",
     },
+
+    status: {
+      type: String,
+      enum: ["active", "block"],
+      default: "active",
+    },
+
     password: {
       type: String,
       required: true,
@@ -31,7 +39,13 @@ const userSchema = new Schema<TUser>(
     },
     address: {
       type: String,
-      required: true,
+    },
+    image: {
+      type: String,
+    },
+    isDelete: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -47,6 +61,7 @@ const userSchema = new Schema<TUser>(
 
 // using middleware pre hook by save data   === Before
 userSchema.pre("save", async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const userData = this;
   userData.password = await Bcrypt.hash(
     this.password,

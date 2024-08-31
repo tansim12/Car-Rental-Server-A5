@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { Types } from "mongoose";
 dotenv.config();
 
 export const dynamicTokenGenerate = (
-  jwtPayload: { email: string; role: string },
+  jwtPayload: { id: Types.ObjectId; role: string },
   token: string,
   time: string
 ) => {
