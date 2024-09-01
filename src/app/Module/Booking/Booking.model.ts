@@ -3,28 +3,36 @@ import { TBookings } from "./Booking.interface";
 
 const bookingSchema = new Schema<TBookings>(
   {
-    car: {
+    carId: {
       type: Schema.Types.ObjectId,
       ref: "Car",
       required: true,
     },
-    date: {
+    startDate: {
       type: String,
       required: true,
     },
-    startTime: {
+    endDate: {
       type: String,
       required: true,
     },
-    endTime: {
-      type: String,
-      default: null,
-    },
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
     totalCost: {
+      type: Number,
+    },
+    advancePayment: {
+      type: Number,
+    },
+    deuPayment: {
+      type: Number,
+    },
+    otp: {
+      type: String,
+    },
+    paymentStatus: {
       type: Number,
       default: 0,
     },

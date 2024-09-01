@@ -4,18 +4,22 @@ import { TCar } from "./Car.interface";
 import { CarModel } from "./Car.model";
 import QueryBuilder from "../../Builder/QueryBuilder";
 import { carSearchTerm } from "./Car.const";
+import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
 // import { sendImageCloudinary } from "../../Utils/sendImageCloudinary";
 // import mongoose from "mongoose";
 // import { BookingModel } from "../Booking/Booking.model";
 // import { timeToHours } from "./Car.utils";
 
-const crateCarDB = async (payload: TCar,) => {
-// console.log(files);
+const crateCarDB = async (payload: TCar, files: any) => {
+  const filesPathNames = files.map((item: { path: any }) => item.path);
+  const imageUrls = await sendImagesToCloudinary(filesPathNames);
+  console.log(imageUrls);
+  const newPayload = {
+    ...payload,
+    images: imageUrls,
+  };
 
-//   const imageUrls = await sendImageCloudinary(files)
-//   console.log(imageUrls);
-  
-  const result = await CarModel.create(payload);
+  const result = await CarModel.create(newPayload);
   return result;
 };
 const findOneCarDB = async (id: string) => {

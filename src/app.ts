@@ -14,7 +14,7 @@ normalMiddleware(app);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
-app.use("/api/bookings", bookingRoutes);
+// app.use("/api/bookings", bookingRoutes);
 app.use("/api/user", userRoutes);
 
 
