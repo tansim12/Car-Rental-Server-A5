@@ -4,11 +4,15 @@ import { carZodValidation } from "./Car.zodValidation";
 import { carController } from "./Car.controller";
 import { authMiddleWare } from "../../middleware/AuthMiddleWare";
 import { USER_ROLE } from "../User/User.const";
+// import { upload } from "../../Utils/sendImageCloudinary";
+// import { jsonDataSetMiddleware } from "../../middleware/jsonDataSetMiddleware";
 const router = express.Router();
 
 router.post(
   "/",
   authMiddleWare(USER_ROLE.admin),
+  // upload,
+  // jsonDataSetMiddleware,
   validationMiddleWare(carZodValidation.createCarZodSchema),
   carController.createCar
 );
