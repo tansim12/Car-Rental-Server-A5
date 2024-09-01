@@ -1,6 +1,11 @@
 // import { Types } from "mongoose";
 import { z } from "zod";
-import { carAvailabilityArray, carAvailableAreaArray, carCategoryArray, carTypeArray } from "./Car.const";
+import {
+  carAvailabilityArray,
+  carAvailableAreaArray,
+  carCategoryArray,
+  carTypeArray,
+} from "./Car.const";
 
 // const timeStringSchema = z.string().refine(
 //   (time) => {
@@ -42,17 +47,17 @@ const createCarZodSchema = z.object({
     mileage: z
       .number()
       .min(0, { message: "Mileage must be a non-negative number" }),
-    rentalPricePerDay: z
-      .number()
-      .min(0, {
-        message: "Rental price per day must be a non-negative number",
-      }),
+    rentalPricePerDay: z.number().min(0, {
+      message: "Rental price per day must be a non-negative number",
+    }),
     advance: z
       .number()
       .min(0, { message: "Advance must be a non-negative number" }),
-    availability: z.enum(carAvailabilityArray as [string, ...string[]], {
-      errorMap: () => ({ message: "Invalid availability status" }),
-    }),
+    availability: z
+      .enum(carAvailabilityArray as [string, ...string[]], {
+        errorMap: () => ({ message: "Invalid availability status" }),
+      })
+      .optional(),
     availableAreas: z.array(TAvailableArea, {
       errorMap: () => ({ message: "Each area must be a valid available area" }),
     }),

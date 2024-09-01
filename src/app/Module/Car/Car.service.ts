@@ -1,7 +1,9 @@
-// import httpStatus from "http-status";
-// import AppError from "../../Error-Handle/AppError";
-import { TCar, TCarReturn } from "./Car.interface";
+import httpStatus from "http-status";
+import AppError from "../../Error-Handle/AppError";
+import { TCar } from "./Car.interface";
 import { CarModel } from "./Car.model";
+import QueryBuilder from "../../Builder/QueryBuilder";
+import { carSearchTerm } from "./Car.const";
 // import mongoose from "mongoose";
 // import { BookingModel } from "../Booking/Booking.model";
 // import { timeToHours } from "./Car.utils";
@@ -10,19 +12,51 @@ const crateCarDB = async (payload: TCar) => {
   const result = await CarModel.create(payload);
   return result;
 };
-// const findOneCarDB = async (id: string) => {
-//   const result = await CarModel.findById(id);
-//   if (result) {
-//     return result;
-//   } else {
-//     throw new AppError(404, "No Data Found !");
-//   }
-// };
+const findOneCarDB = async (id: string) => {
+  const result = await CarModel.findById(id);
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "No Data Found !");
+  }
+  if (result?.isDelete) {
+    throw new AppError(404, "This Carl Already Deleted !");
+  }
+  return result;
+};
 
-// const findAllCarsDB = async () => {
-//   const result = await CarModel.find();
-//   return result;
-// };
+const findAllCarsByAdminOneDB = async (queryParams: Partial<TCar>) => {
+  const carQuery = new QueryBuilder(CarModel.find(), queryParams)
+    .search(carSearchTerm)
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+  const result = await carQuery.modelQuery;
+  const meta = await carQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
+};
+
+const findAllCarsByEveryOneDB = async (queryParams: Partial<TCar>) => {
+  const carQuery = new QueryBuilder(
+    CarModel.find({ isDelete: false }),
+    queryParams
+  )
+    .search(carSearchTerm)
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+  const result = await carQuery.modelQuery;
+  const meta = await carQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
+};
 
 // const updateCarDB = async (id: string, payload: Partial<TCar>) => {
 //   const isExists = await CarModel.findById(id);
@@ -123,8 +157,9 @@ const crateCarDB = async (payload: TCar) => {
 
 export const carService = {
   crateCarDB,
-  // findAllCarsDB,
-  // findOneCarDB,
+  findOneCarDB,
+  findAllCarsByAdminOneDB,
+  findAllCarsByEveryOneDB,
   // updateCarDB,
   // deleteCarDB,
   // carReturnDB,

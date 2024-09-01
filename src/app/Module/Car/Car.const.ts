@@ -2,7 +2,6 @@ export const CARAVAILABLE = {
   available: "available",
   unavailable: "unavailable",
 };
-
 export const carCategoryArray = [
   "Luxury",
   "Economy",
@@ -10,10 +9,8 @@ export const carCategoryArray = [
   "Sedan",
   "Convertible",
 ];
-
 export const carAvailabilityArray = ["available", "unavailable"];
 export const carTypeArray = ["Featured", "New Arrival"];
-
 export const carAvailableAreaArray = [
   "Dhaka",
   "Chittagong",
@@ -32,4 +29,14 @@ export const carAvailableAreaArray = [
   "Jamalpur",
   "Patuakhali",
   "Brahmanbaria",
+];
+
+export const carSearchTerm = [
+  "color",
+  "model",
+  "type",
+  "description",
+  "brand",
+  "category",
+  "name",
 ];

@@ -10,22 +10,30 @@ const createCar: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// const findOneCar: RequestHandler = async (req, res, next) => {
-//   try {
-//     const result = await carService.findOneCarDB(req.params.id);
-//     res.send(successResponse(result, 200, "A Car retrieved successfully"));
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-// const findAllCars: RequestHandler = async (req, res, next) => {
-//   try {
-//     const result = await carService.findAllCarsDB();
-//     res.send(successResponse(result, 200, "Cars retrieved successfully"));
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+const findOneCar: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.findOneCarDB(req.params.id);
+    res.send(successResponse(result, 200, "A Car retrieved successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+const findAllCarsByAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.findAllCarsByAdminOneDB(req?.query);
+    res.send(successResponse(result, 200, "Cars retrieved successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+const findAllCarsByEveryOne: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.findAllCarsByEveryOneDB(req?.query);
+    res.send(successResponse(result, 200, "Cars retrieved successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
 
 // const updateCar: RequestHandler = async (req, res, next) => {
 //   try {
@@ -54,8 +62,9 @@ const createCar: RequestHandler = async (req, res, next) => {
 // };
 export const carController = {
   createCar,
-  // findAllCars,
-  // findOneCar,
+  findOneCar,
+  findAllCarsByAdmin,
+  findAllCarsByEveryOne,
   // updateCar,
   // deleteCar,
   // carReturn,

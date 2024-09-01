@@ -63,6 +63,7 @@ const carSchema = new Schema<TCar>(
     availability: {
       type: String,
       enum: carAvailabilityArray,
+      default:"available",
       required: true,
     },
     availableAreas: {

@@ -25,7 +25,12 @@ router.post(
 //   carController.updateCar
 // );
 // router.delete("/:id", authMiddleWare(USER_ROLE.admin), carController.deleteCar);
-// router.get("/", carController.findAllCars);
-// router.get("/:id", carController.findOneCar);
+router.get("/", carController.findAllCarsByEveryOne);
+router.get(
+  "/find-cars-admin",
+  authMiddleWare(USER_ROLE.admin),
+  carController.findAllCarsByAdmin
+);
+router.get("/:id", carController.findOneCar);
 
 export const carRoutes = router;

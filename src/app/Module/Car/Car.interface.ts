@@ -1,16 +1,5 @@
 import { Types } from "mongoose";
 
-// export interface TCar {
-//   name: string;
-//   description: string;
-//   color: string;
-//   isElectric: boolean;
-//   features: string[];
-//   pricePerHour: number;
-//   status?: "available" | "unavailable";
-//   isDeleted?: boolean;
-// }
-
 export interface TCarReturn {
   bookingId: Types.ObjectId;
   endTime: string;
@@ -57,7 +46,7 @@ export interface TCar {
   mileage: number;
   rentalPricePerDay: number;
   advance: number;
-  availability: TAvailable;
+  availability?: TAvailable;
   availableAreas: TAvailableArea[];
   numberOfDoors: number;
   seatingCapacity: number;
