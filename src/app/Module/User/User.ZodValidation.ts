@@ -24,7 +24,28 @@ const userCreateValidationSchemaZod = z.object({
     image: z.string().nonempty("Image is required").optional(),
   }),
 });
+const userUpdateValidationSchemaZod = z.object({
+  body: z.object({
+    name: z.string().nonempty("Name is required").optional(),
+    email: z
+      .string()
+      .email({ message: "Email must be a valid email" })
+      .nonempty({ message: "Email is required" })
+      .optional(),
+    role: z
+      .enum(["user", "admin"], { required_error: "Role is required" })
+      .optional(),
+    status: z
+      .enum(["active", "block"], { required_error: "Status is required" })
+      .optional(),
+    isDelete: z.boolean().optional(),
+    phone: z.string().nonempty("Phone number is required").optional(),
+    address: z.string().nonempty("Address is required").optional(),
+    image: z.string().nonempty("Image is required").optional(),
+  }),
+});
 
 export const UserZodValidation = {
   userCreateValidationSchemaZod,
+  userUpdateValidationSchemaZod,
 };
