@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
   "/",
   authMiddleWare(USER_ROLE.admin),
-  upload.array('file', 2),
+  upload.array('file', 10),
   // upload.single("file"),
   jsonDataSetMiddleware,
   validationMiddleWare(carZodValidation.createCarZodSchema),
