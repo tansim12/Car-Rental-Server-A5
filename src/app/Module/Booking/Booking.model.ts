@@ -20,6 +20,10 @@ const bookingSchema = new Schema<TBookings>(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    orderCancel: {
+      type: Boolean,
+      default: false,
+    },
     totalCost: {
       type: Number,
     },

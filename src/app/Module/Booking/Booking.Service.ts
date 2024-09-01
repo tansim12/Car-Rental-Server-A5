@@ -5,6 +5,9 @@ import { TBookings } from "./Booking.interface";
 import mongoose from "mongoose";
 import { BookingModel } from "./Booking.model";
 import QueryBuilder from "../../Builder/QueryBuilder";
+import { CARAVAILABLE } from "../Car/Car.const";
+import { TCar } from "../Car/Car.interface";
+import { calculateDaysDifference } from "../../Utils/calculateDaysDifference";
 
 const createBookingsDB = async (
   payload: Partial<TBookings>,
@@ -12,46 +15,53 @@ const createBookingsDB = async (
 ) => {
   const session = await mongoose.startSession();
   const { carId } = payload;
-  const carIsExists = await CarModel.findById({ _id: carId });
-  if (!carIsExists) {
-    throw new AppError(404, "Data Not Found !");
-  }
-
-  const isAvailable = carIsExists?.status;
-  const carIsDeleted = carIsExists.isDeleted;
-  if (isAvailable !== "available") {
-    throw new AppError(httpStatus.BAD_REQUEST, "This Car Not Available !");
-  }
-  if (carIsDeleted) {
-    throw new AppError(httpStatus.BAD_REQUEST, "This Car Already Deleted !");
-  }
 
   try {
     await session.startTransaction();
-    const updateCar = await CarModel.findByIdAndUpdate(
-      { _id: carId },
-      { status: "unavailable" },
-      { new: true, session }
-    );
 
-    if (!updateCar) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Car status Updated failed !");
+    const carIsExists: Partial<TCar | null> = await CarModel.findById({
+      _id: carId,
+    });
+    if (!carIsExists) {
+      throw new AppError(404, "Data Not Found !");
+    }
+    const isAvailable = carIsExists?.availability;
+    const carIsDeleted = carIsExists.isDelete;
+    if (isAvailable !== CARAVAILABLE.available) {
+      throw new AppError(httpStatus.BAD_REQUEST, "This Car Not Available !");
+    }
+    if (carIsDeleted) {
+      throw new AppError(httpStatus.BAD_REQUEST, "This Car Already Deleted !");
+    }
+    const advancePayment = carIsExists?.advance as number;
+    const perDay = carIsExists?.rentalPricePerDay;
+    const totalDays = calculateDaysDifference(
+      payload?.startDate as string,
+      payload?.endDate as string
+    );
+    if (totalDays === 404) {
+      throw new AppError(400, "Start date cannot be later than end date. ");
     }
 
+    const totalCost = (perDay as number) * totalDays;
+    const deuPayment = totalCost - advancePayment;
+    const otp = Math.floor(10000 + Math.random() * 90000).toString();
+
     const newPayload = {
-      date: payload?.date,
-      car: payload.carId,
-      startTime: payload?.startTime,
-      user: userId,
+      ...payload,
+      advancePayment,
+      totalCost,
+      deuPayment,
+      otp,
     };
 
     const bookingResult = await BookingModel.create([newPayload], { session });
     if (!bookingResult.length) {
       throw new AppError(httpStatus.BAD_REQUEST, "Booking failed !");
     }
-    const result = await BookingModel.findById(bookingResult[0]._id)
-      .populate("car user")
-      .session(session);
+    const result = await BookingModel.findById({
+      _id: bookingResult[0]._id,
+    }).session(session);
     await session.commitTransaction();
     await session.endSession();
     return result;

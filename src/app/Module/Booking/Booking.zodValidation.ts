@@ -33,6 +33,7 @@ const bookingCreatingValidationSchemaZod = z.object({
     userId: z.string().refine((val) => Types.ObjectId.isValid(val), {
       message: "Invalid User ID",
     }),
+    orderCancel: z.boolean().optional(),
     advancePayment: z
       .number()
       .nonnegative({

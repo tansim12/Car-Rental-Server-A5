@@ -13,7 +13,6 @@ import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
 const crateCarDB = async (payload: TCar, files: any) => {
   const filesPathNames = files.map((item: { path: any }) => item.path);
   const imageUrls = await sendImagesToCloudinary(filesPathNames);
-  console.log(imageUrls);
   if (!imageUrls?.length) {
     throw new AppError(httpStatus.BAD_REQUEST,'There is no image file !')
   }

@@ -4,8 +4,8 @@ export interface TBookings {
   carId: Types.ObjectId;
   startDate: string;
   endDate: string;
-  orderCancle:boolean
   userId: Types.ObjectId;
+  orderCancel?:boolean
   advancePayment?: number;
   totalCost?: number;
   deuPayment?: number;
