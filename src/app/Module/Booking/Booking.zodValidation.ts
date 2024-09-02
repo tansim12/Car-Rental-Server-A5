@@ -20,9 +20,12 @@ const bookingCreatingValidationSchemaZod = z.object({
 
     startDate: dateSchema,
     endDate: dateSchema,
-    userId: z.string().refine((val) => Types.ObjectId.isValid(val), {
-      message: "Invalid User ID",
-    }).optional(),
+    userId: z
+      .string()
+      .refine((val) => Types.ObjectId.isValid(val), {
+        message: "Invalid User ID",
+      })
+      .optional(),
     orderCancel: z.boolean().optional(),
     advancePayment: z
       .number()
@@ -47,7 +50,7 @@ const bookingCreatingValidationSchemaZod = z.object({
       .min(6, { message: "OTP must be at least 6 characters long." })
       .optional(),
     paymentStatus: z.enum(["0", "1", "2"]).transform(Number).optional(),
-    adminApprove: z.enum(["0", "1", "2"]).transform(Number).optional(),
+    adminApprove: z.enum(["0", "1", "2", "3"]).transform(Number).optional(),
   }),
 });
 

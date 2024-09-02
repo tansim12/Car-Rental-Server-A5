@@ -44,6 +44,10 @@ const bookingSchema = new Schema<TBookings>(
       type: Number,
       default: 0,
     },
+    isDelete: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
