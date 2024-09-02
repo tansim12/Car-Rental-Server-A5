@@ -5,6 +5,7 @@ import { authRoutes } from "./app/Module/Auth/Auth.route";
 import { carRoutes } from "./app/Module/Car/Car.route";
 import { bookingRoutes } from "./app/Module/Booking/Booking.route";
 import { userRoutes } from "./app/Module/User/User.route";
+import { paymentRoutes } from "./app/Module/Payment/Payment.route";
 // import { userRoutes } from "./app/Module/User/User.route";
 
 const app: Application = express();
@@ -16,6 +17,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/payment", paymentRoutes);
 
 
 
