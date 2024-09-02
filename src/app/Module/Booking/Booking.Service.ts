@@ -8,6 +8,8 @@ import QueryBuilder from "../../Builder/QueryBuilder";
 import { CARAVAILABLE } from "../Car/Car.const";
 import { TCar } from "../Car/Car.interface";
 import { calculateDaysDifference } from "../../Utils/calculateDaysDifference";
+import { UserModel } from "../User/User.model";
+import { USER_STATUS } from "../User/User.const";
 
 const createBookingsDB = async (
   payload: Partial<TBookings>,
@@ -15,13 +17,24 @@ const createBookingsDB = async (
 ) => {
   const session = await mongoose.startSession();
   const { carId } = payload;
+  const user = await UserModel.findById({ _id: userId });
+  
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Delete");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
+  }
 
   try {
     await session.startTransaction();
-
     const carIsExists: Partial<TCar | null> = await CarModel.findById({
       _id: carId,
-    });
+    }).session(session).select("_id availability isDelete advance availableAreas rentalPricePerDay");
+    
     if (!carIsExists) {
       throw new AppError(404, "Data Not Found !");
     }
@@ -32,7 +45,7 @@ const createBookingsDB = async (
     }
     if (carIsDeleted) {
       throw new AppError(httpStatus.BAD_REQUEST, "This Car Already Deleted !");
-    }
+    }    
     const advancePayment = carIsExists?.advance as number;
     const perDay = carIsExists?.rentalPricePerDay;
     const totalDays = calculateDaysDifference(
@@ -45,16 +58,16 @@ const createBookingsDB = async (
 
     const totalCost = (perDay as number) * totalDays;
     const deuPayment = totalCost - advancePayment;
-    const otp = Math.floor(10000 + Math.random() * 90000).toString();
+    // const otp = Math.floor(10000 + Math.random() * 90000).toString();
 
     const newPayload = {
       ...payload,
       advancePayment,
       totalCost,
       deuPayment,
-      otp,
-    };
-
+      userId: user?._id,
+      // otp,
+    }; 
     const bookingResult = await BookingModel.create([newPayload], { session });
     if (!bookingResult.length) {
       throw new AppError(httpStatus.BAD_REQUEST, "Booking failed !");
