@@ -18,7 +18,7 @@ const createBookingsDB = async (
   const session = await mongoose.startSession();
   const { carId } = payload;
   const user = await UserModel.findById({ _id: userId });
-  
+
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
   }
@@ -33,8 +33,12 @@ const createBookingsDB = async (
     await session.startTransaction();
     const carIsExists: Partial<TCar | null> = await CarModel.findById({
       _id: carId,
-    }).session(session).select("_id availability isDelete advance availableAreas rentalPricePerDay");
-    
+    })
+      .session(session)
+      .select(
+        "_id availability isDelete advance availableAreas rentalPricePerDay"
+      );
+
     if (!carIsExists) {
       throw new AppError(404, "Data Not Found !");
     }
@@ -45,7 +49,7 @@ const createBookingsDB = async (
     }
     if (carIsDeleted) {
       throw new AppError(httpStatus.BAD_REQUEST, "This Car Already Deleted !");
-    }    
+    }
     const advancePayment = carIsExists?.advance as number;
     const perDay = carIsExists?.rentalPricePerDay;
     const totalDays = calculateDaysDifference(
@@ -67,7 +71,7 @@ const createBookingsDB = async (
       deuPayment,
       userId: user?._id,
       // otp,
-    }; 
+    };
     const bookingResult = await BookingModel.create([newPayload], { session });
     if (!bookingResult.length) {
       throw new AppError(httpStatus.BAD_REQUEST, "Booking failed !");
@@ -125,10 +129,35 @@ const findAllBookingsDB = async (queryParams: Partial<TBookings>) => {
   }
 };
 
-const findOneMyBookingsDB = async (id: string) => {
-  const result = await BookingModel.find({ user: id }).populate("user car");
+const findOneMyBookingsDB = async (
+  id: string,
+  queryParams: Partial<TBookings>
+) => {
+  const user = await UserModel.findById(id);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Delete");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
+  }
+  
+  const myBookingQuery = new QueryBuilder(
+    BookingModel.find({ userId: id }),
+    queryParams
+  )
+    .search([])
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+  const result = await myBookingQuery.modelQuery;
+  const meta = await myBookingQuery.countTotal();
   if (result.length) {
-    return result;
+    return { meta, result };
   } else {
     throw new AppError(404, "Data Not Found !");
   }

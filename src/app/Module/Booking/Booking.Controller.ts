@@ -15,7 +15,10 @@ const createBookings: RequestHandler = async (req, res, next) => {
 };
 const findAllBookings: RequestHandler = async (req, res, next) => {
   try {
-    const result = await bookingsService.findAllBookingsDB(req.query);
+    const result = await bookingsService.findAllBookingsDB(
+      req.user?.id,
+      req.query
+    );
     res.send(successResponse(result, 200, "Bookings retrieved successfully"));
   } catch (error) {
     next(error);
@@ -23,7 +26,10 @@ const findAllBookings: RequestHandler = async (req, res, next) => {
 };
 const findOneMyBookings: RequestHandler = async (req, res, next) => {
   try {
-    const result = await bookingsService.findOneMyBookingsDB(req.user?.id);
+    const result = await bookingsService.findOneMyBookingsDB(
+      req.user?.id,
+      req.query
+    );
     res.send(
       successResponse(result, 200, "My Bookings retrieved successfully")
     );
