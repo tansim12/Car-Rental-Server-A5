@@ -71,6 +71,7 @@ const createBookingsDB = async (
       totalCost,
       deuPayment,
       userId: user?._id,
+      rentalPricePerDay:perDay
       // otp,
     };
     const bookingResult = await BookingModel.create([newPayload], { session });

@@ -7,6 +7,7 @@ export interface TBookings {
   userId?: Types.ObjectId;
   orderCancel?: boolean;
   advancePayment?: number;
+  rentalPricePerDay?:number
   totalCost?: number;
   deuPayment?: number;
   otp?: string;

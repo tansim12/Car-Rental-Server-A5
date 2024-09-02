@@ -48,6 +48,9 @@ const bookingSchema = new Schema<TBookings>(
       type: Boolean,
       default: false,
     },
+    rentalPricePerDay: {
+      type: Number,
+    },
   },
   {
     timestamps: true,
