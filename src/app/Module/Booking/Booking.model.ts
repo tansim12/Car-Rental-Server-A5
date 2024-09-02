@@ -40,6 +40,10 @@ const bookingSchema = new Schema<TBookings>(
       type: Number,
       default: 0,
     },
+    adminApprove: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

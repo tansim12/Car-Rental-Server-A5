@@ -10,6 +10,7 @@ import { TCar } from "../Car/Car.interface";
 import { calculateDaysDifference } from "../../Utils/calculateDaysDifference";
 import { UserModel } from "../User/User.model";
 import { USER_STATUS } from "../User/User.const";
+import { bookingUserSearchTram } from "./Booking.const";
 
 const createBookingsDB = async (
   payload: Partial<TBookings>,
@@ -89,52 +90,12 @@ const createBookingsDB = async (
   }
 };
 
-const findAllBookingsDB = async (queryParams: Partial<TBookings>) => {
-  const { carId, date } = queryParams;
-  const newQueryParams: Partial<TBookings> = { ...queryParams };
-  const checkDataFormate = (d: string) =>
-    /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d).getTime());
-
-  if (date && !checkDataFormate(date)) {
-    throw new AppError(
-      400,
-      `Date formate should be YYYY-MM-DD . You have ${date}`
-    );
-  }
-  if (carId) {
-    const carIsExists = await CarModel.findById({ _id: carId });
-    if (!carIsExists) {
-      throw new AppError(404, "Data Not Found !");
-    }
-  }
-
-  // console.log(queryParams);
-  if (newQueryParams?.carId) {
-    newQueryParams.car = new mongoose.Types.ObjectId(newQueryParams.carId) as
-      | mongoose.Types.ObjectId
-      | undefined;
-    delete newQueryParams?.carId;
-  }
-
-  const carQuery = new QueryBuilder(
-    BookingModel.find().populate("car user"),
-    newQueryParams
-  ).filter();
-  const result = await carQuery.modelQuery;
-
-  if (result?.length) {
-    return result;
-  } else {
-    throw new AppError(404, "Data Not Found !");
-  }
-};
-
 const findOneMyBookingsDB = async (
   id: string,
   queryParams: Partial<TBookings>
 ) => {
+  const {  startDate,endDate } = queryParams;
   const user = await UserModel.findById(id);
-
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
   }
@@ -144,12 +105,29 @@ const findOneMyBookingsDB = async (
   if (user?.status === USER_STATUS.block) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
   }
-  
+
+ 
+  const checkDataFormate = (d: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d).getTime());
+
+  if (startDate && !checkDataFormate(startDate!)) {
+    throw new AppError(
+      400,
+      `Date formate should be YYYY-MM-DD . You have ${startDate}`
+    );
+  }
+  if (endDate && !checkDataFormate(endDate!)) {
+    throw new AppError(
+      400,
+      `Date formate should be YYYY-MM-DD . You have ${endDate}`
+    );
+  }
+
   const myBookingQuery = new QueryBuilder(
     BookingModel.find({ userId: id }),
     queryParams
   )
-    .search([])
+    .search(bookingUserSearchTram)
     .filter()
     .paginate()
     .sort()
@@ -158,6 +136,60 @@ const findOneMyBookingsDB = async (
   const meta = await myBookingQuery.countTotal();
   if (result.length) {
     return { meta, result };
+  } else {
+    throw new AppError(404, "Data Not Found !");
+  }
+};
+
+
+
+const findAllBookingsDB = async (
+  userId: string,
+  queryParams: Partial<TBookings>
+) => {
+  const newQueryParams: Partial<TBookings> = { ...queryParams };
+  const { carId, startDate,endDate } = queryParams;
+  const checkDataFormate = (d: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d).getTime());
+
+  if (startDate && !checkDataFormate(startDate!)) {
+    throw new AppError(
+      400,
+      `Date formate should be YYYY-MM-DD . You have ${startDate}`
+    );
+  }
+  if (endDate && !checkDataFormate(endDate!)) {
+    throw new AppError(
+      400,
+      `Date formate should be YYYY-MM-DD . You have ${endDate}`
+    );
+  }
+  if (carId) {
+    const carIsExists = await CarModel.findById({ _id: carId }).select("isDelete");
+    
+    if (!carIsExists) {
+      throw new AppError(404, "This Car Data Not Found !");
+    }
+    if (carIsExists?.isDelete) {
+      throw new AppError(404, "This Car Already Delete !");
+    }
+  }
+
+  // console.log(queryParams);
+  if (newQueryParams?.carId) {
+    newQueryParams.carId = new mongoose.Types.ObjectId(newQueryParams.carId) as
+      | mongoose.Types.ObjectId
+      | undefined;
+  }
+
+  const carQuery = new QueryBuilder(
+    BookingModel.find({paymentStatus:1}),
+    newQueryParams
+  ).filter();
+  const result = await carQuery.modelQuery;
+
+  if (result?.length) {
+    return result;
   } else {
     throw new AppError(404, "Data Not Found !");
   }

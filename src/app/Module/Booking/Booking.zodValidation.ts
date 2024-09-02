@@ -1,16 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
 
-// const timeStringSchema = z.string().refine(
-//   (time) => {
-//     const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
-//     return regex.test(time);
-//   },
-//   {
-//     message: 'Invalid time format, expected "HH:MM" in 24 hours format',
-//   }
-// );
-
 // Define a Zod schema for the date format (YYYY-MM-DD)
 const dateSchema = z
   .string()
@@ -57,6 +47,7 @@ const bookingCreatingValidationSchemaZod = z.object({
       .min(6, { message: "OTP must be at least 6 characters long." })
       .optional(),
     paymentStatus: z.enum(["0", "1", "2"]).transform(Number).optional(),
+    adminApprove: z.enum(["0", "1", "2"]).transform(Number).optional(),
   }),
 });
 
