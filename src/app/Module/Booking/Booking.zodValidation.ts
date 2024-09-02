@@ -12,6 +12,16 @@ const dateSchema = z
     }
   );
 
+  const PaymentInfoSchema = z.object({
+    mer_txnid: z.string().nonempty({ message: "Transaction ID is required" }),
+    cus_email: z.string().nonempty({ message: "Customer name is required" }),
+    cus_phone: z.string().nonempty({ message: "Customer phone is required" }),
+    amount: z.number().positive({ message: "Amount must be a positive number" }),
+    payment_type: z.string().nonempty({ message: "Payment type is required" }),
+    approval_code: z.string().nonempty({ message: "Approval code is required" }),
+  });
+  
+
 const bookingCreatingValidationSchemaZod = z.object({
   body: z.object({
     carId: z.string().refine((val) => Types.ObjectId.isValid(val), {
@@ -51,6 +61,9 @@ const bookingCreatingValidationSchemaZod = z.object({
       .optional(),
     paymentStatus: z.enum(["0", "1", "2"]).transform(Number).optional(),
     adminApprove: z.enum(["0", "1", "2", "3"]).transform(Number).optional(),
+    advancePaymentInfo: PaymentInfoSchema.optional(),
+    deuPaymentInfo: PaymentInfoSchema.optional(),
+  
   }),
 });
 

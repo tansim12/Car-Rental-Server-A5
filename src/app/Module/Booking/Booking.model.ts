@@ -1,6 +1,14 @@
 import { Schema, model } from "mongoose";
-import { TBookings } from "./Booking.interface";
+import { TBookings, TPaymentInfo } from "./Booking.interface";
 
+const PaymentInfoSchema = new Schema<TPaymentInfo>({
+  mer_txnid: { type: String, required: true },
+  cus_email: { type: String, required: true },
+  cus_phone: { type: String, required: true },
+  amount: { type: Number, required: true },
+  payment_type: { type: String, required: true },
+  approval_code: { type: String, required: true },
+});
 const bookingSchema = new Schema<TBookings>(
   {
     carId: {
@@ -50,6 +58,12 @@ const bookingSchema = new Schema<TBookings>(
     },
     rentalPricePerDay: {
       type: Number,
+    },
+    advancePaymentInfo: {
+      type: PaymentInfoSchema,
+    },
+    deuPaymentInfo: {
+      type: PaymentInfoSchema,
     },
   },
   {

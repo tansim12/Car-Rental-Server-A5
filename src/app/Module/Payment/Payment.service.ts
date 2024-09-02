@@ -8,6 +8,7 @@ import { BookingModel } from "../Booking/Booking.model";
 import { CARAVAILABLE } from "../Car/Car.const";
 dotenv.config();
 import { v7 as uuidv7 } from "uuid";
+import { verifyPayment } from "../../Utils/verifyPayment";
 
 type TCarId =
   | {
@@ -54,8 +55,6 @@ const paymentDB = async (body: any, userId: string) => {
       ? (booking.carId as TCarId)
       : undefined;
 
-  console.log(carData);
-
   if (carData) {
     if (carData?.availability === CARAVAILABLE.unavailable) {
       throw new AppError(httpStatus.BAD_REQUEST, "Car Is Unavailable Now !");
@@ -91,9 +90,9 @@ const paymentDB = async (body: any, userId: string) => {
     cus_add2: "N/A",
     cus_city: "N/A",
     cus_country: "Bangladesh",
-    success_url: `${process.env.BASE_URL}api/payment/callback`,
+    success_url: `${process.env.BASE_URL}api/payment/callback?isAdvancePayment=${isAdvancePayment}&txnId=${combinedTransactionId}&bookingId=${bookingId}`,
     fail_url: `${process.env.BASE_URL}api/payment/callback`,
-    cancel_url: `http://localhost:5173/`, // its redirect to frontend directly
+    cancel_url: `${process.env.FRONTEND_URL}payment-cancel`, // its redirect to frontend directly
     type: "json", //This is must required for JSON request
   };
 
@@ -114,8 +113,65 @@ const paymentDB = async (body: any, userId: string) => {
   };
 };
 
-const callbackDB = async (body: any) => {
-  console.log(body);
+const callbackDB = async (body: any, query: any) => {
+  if (body && body?.status_code === "2") {
+    const verifyPaymentData = await verifyPayment(query?.txnId);
+    if (verifyPaymentData && verifyPaymentData?.status_code === "2") {
+      // data update here
+      const { approval_code, payment_type, amount, cus_phone, mer_txnid } =
+        verifyPaymentData;
+      const paymentData = {
+        mer_txnid,
+        cus_phone,
+        amount,
+        payment_type,
+        approval_code,
+      };
+      const bookingId = query?.bookingId;
+      if (query?.isAdvancePayment === "true") {
+        const result = await BookingModel.findByIdAndUpdate(
+          { _id: bookingId },
+          {
+            paymentStatus: 1,
+            advancePaymentInfo: paymentData,
+          },
+          {
+            new: true,
+          }
+        );
+        if (result) {
+          return {
+            success: true,
+            bookingId: result?._id,
+          };
+        }
+      }
+      if (query?.isAdvancePayment === "false") {
+        const result = await BookingModel.findByIdAndUpdate(
+          { _id: bookingId },
+          {
+            paymentStatus: 2,
+            deuPaymentInfo: paymentData,
+          },
+          {
+            new: true,
+          }
+        );
+        if (result) {
+          return {
+            success: true,
+            bookingId: result?._id,
+          };
+        }
+      }
+    }
+  }
+
+  if (body && body?.status_code === "7") {
+    return {
+      success: false,
+    };
+  }
 };
 
 export const paymentService = {
