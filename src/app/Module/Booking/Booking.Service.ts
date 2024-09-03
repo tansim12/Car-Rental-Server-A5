@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from "http-status";
 import AppError from "../../Error-Handle/AppError";
 import { CarModel } from "../Car/Car.model";
@@ -9,7 +10,7 @@ import { CARAVAILABLE } from "../Car/Car.const";
 import { TCar } from "../Car/Car.interface";
 import { calculateDaysDifference } from "../../Utils/calculateDaysDifference";
 import { UserModel } from "../User/User.model";
-import { USER_STATUS } from "../User/User.const";
+import { USER_ROLE, USER_STATUS } from "../User/User.const";
 import { bookingUserSearchTram } from "./Booking.const";
 
 const createBookingsDB = async (
@@ -71,7 +72,7 @@ const createBookingsDB = async (
       totalCost,
       deuPayment,
       userId: user?._id,
-      rentalPricePerDay:perDay
+      rentalPricePerDay: perDay,
       // otp,
     };
     const bookingResult = await BookingModel.create([newPayload], { session });
@@ -95,7 +96,7 @@ const findOneMyBookingsDB = async (
   id: string,
   queryParams: Partial<TBookings>
 ) => {
-  const {  startDate,endDate } = queryParams;
+  const { startDate, endDate } = queryParams;
   const user = await UserModel.findById(id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
@@ -107,7 +108,6 @@ const findOneMyBookingsDB = async (
     throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
   }
 
- 
   const checkDataFormate = (d: string) =>
     /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d).getTime());
 
@@ -142,14 +142,12 @@ const findOneMyBookingsDB = async (
   }
 };
 
-
-
 const findAllBookingsDB = async (
   userId: string,
   queryParams: Partial<TBookings>
 ) => {
   const newQueryParams: Partial<TBookings> = { ...queryParams };
-  const { carId, startDate,endDate } = queryParams;
+  const { carId, startDate, endDate } = queryParams;
   const checkDataFormate = (d: string) =>
     /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d).getTime());
 
@@ -166,8 +164,10 @@ const findAllBookingsDB = async (
     );
   }
   if (carId) {
-    const carIsExists = await CarModel.findById({ _id: carId }).select("isDelete");
-    
+    const carIsExists = await CarModel.findById({ _id: carId }).select(
+      "isDelete"
+    );
+
     if (!carIsExists) {
       throw new AppError(404, "This Car Data Not Found !");
     }
@@ -184,7 +184,7 @@ const findAllBookingsDB = async (
   }
 
   const carQuery = new QueryBuilder(
-    BookingModel.find({paymentStatus:1}),
+    BookingModel.find({ paymentStatus: 1 }),
     newQueryParams
   ).filter();
   const result = await carQuery.modelQuery;
@@ -196,8 +196,123 @@ const findAllBookingsDB = async (
   }
 };
 
+const updateBookingDB = async (
+  body: Partial<TBookings>,
+  id: string,
+  userId: string
+) => {
+  const booking = await BookingModel.findById(id);
+  const user = await UserModel.findById({ _id: userId });
+  const { startDate, endDate, orderCancel } = body;
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Delete");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
+  }
+
+  if (!booking) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking Data Not Found");
+  }
+
+  // when user role is user then check this conditions
+  if (user?.role === USER_ROLE.user) {
+    if (booking?.isDelete) {
+      throw new AppError(httpStatus.NOT_FOUND, "Booking is deleted");
+    }
+    if (booking?.orderCancel) {
+      throw new AppError(httpStatus.NOT_FOUND, "Booking is Canceled");
+    }
+    if (booking.adminApprove !== 0) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Admin Already Approved. You can't change it"
+      );
+    }
+
+    // Check if the payment has already been made
+    if (booking.paymentStatus !== 0) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Payment already completed. You can't change it"
+      );
+    }
+
+    if (
+      (startDate && endDate) ||
+      orderCancel === true ||
+      orderCancel === false
+    ) {
+      const car = await CarModel.findById({ _id: booking?.carId });
+      const advancePayment = car?.advance as number;
+      const perDay = car?.rentalPricePerDay;
+      const totalDays = calculateDaysDifference(
+        body?.startDate as string,
+        body?.endDate as string
+      );
+      if (totalDays === 404) {
+        throw new AppError(400, "Start date cannot be later than end date. ");
+      }
+      const totalCost = (perDay as number) * totalDays;
+      const deuPayment = totalCost - advancePayment;
+      let payload = { ...body };
+      if (startDate && endDate) {
+        // If the condition is true, add the properties 'deuPayment', 'totalCost', and 'rentalPricePerDay' to the 'payload'.
+        payload = {
+          ...payload,
+          deuPayment, // Adds 'deuPayment' property.
+          totalCost, // Adds 'totalCost' property.
+          rentalPricePerDay: perDay, // Adds 'rentalPricePerDay' property with value from 'perDay'.
+        };
+      }
+
+      if ((startDate && !endDate) || (!startDate && endDate)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Please Select StartDate and EndDate"
+        );
+      }
+
+      console.log({ payload });
+
+      const result = await BookingModel.findByIdAndUpdate(
+        { _id: id },
+        {
+          $set: { ...payload },
+        },
+        { new: true, upsert: true }
+      ).select(
+        "_id startDate endDate deuPayment rentalPricePerDay advancePayment orderCancel totalCost"
+      );
+      return result;
+    } else {
+      throw new AppError(
+        httpStatus.BAD_GATEWAY,
+        "You can change start date, end date,orderCancel "
+      );
+    }
+  }
+
+  const result = await BookingModel.findByIdAndUpdate(
+    { _id: id },
+    {
+      $set: { ...body },
+    },
+    { new: true, upsert: true }
+  );
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking Update Failed");
+  }
+  return result;
+};
+
 export const bookingsService = {
   createBookingsDB,
   findAllBookingsDB,
   findOneMyBookingsDB,
+  updateBookingDB,
 };

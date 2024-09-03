@@ -37,8 +37,24 @@ const findOneMyBookings: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const updateBooking: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.updateBookingDB(
+      req?.body,
+      req?.params?.bookingId,
+      req.user?.id
+    );
+    res.send(
+      successResponse(result, 200, "My Bookings retrieved successfully")
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const bookingsController = {
   createBookings,
   findAllBookings,
   findOneMyBookings,
+  updateBooking,
 };

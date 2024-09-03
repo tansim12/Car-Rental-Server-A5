@@ -12,12 +12,12 @@ router.post(
   validationMiddleWare(bookingZodValidation.bookingCreatingValidationSchemaZod),
   bookingsController.createBookings
 );
-// router.put(
-//   "/:id",
-//   authMiddleWare(USER_ROLE.admin),
-//   validationMiddleWare(carZodValidation.carUpdateValidationSchemaZod),
-//   carController.updateCar
-// );
+router.put(
+  "/:bookingId",
+  authMiddleWare(USER_ROLE.admin, USER_ROLE.user),
+  validationMiddleWare(bookingZodValidation.updateBookingZodSchema),
+  bookingsController.updateBooking
+);
 // router.delete("/:id", authMiddleWare(USER_ROLE.admin), carController.deleteCar);
 router.get(
   "/",
