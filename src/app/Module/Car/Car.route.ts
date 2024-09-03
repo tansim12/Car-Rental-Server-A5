@@ -12,7 +12,6 @@ router.post(
   "/",
   authMiddleWare(USER_ROLE.admin),
   upload.array('file', 10),
-  // upload.single("file"),
   jsonDataSetMiddleware,
   validationMiddleWare(carZodValidation.createCarZodSchema),
   carController.createCar
@@ -23,12 +22,14 @@ router.post(
 //   validationMiddleWare(carZodValidation.carReturnSchemaZod),
 //   carController.carReturn
 // );
-// router.put(
-//   "/:id",
-//   authMiddleWare(USER_ROLE.admin),
-//   validationMiddleWare(carZodValidation.carUpdateValidationSchemaZod),
-//   carController.updateCar
-// );
+router.put(
+  "/:id",
+  authMiddleWare(USER_ROLE.admin),
+  upload.array('file', 10),
+  jsonDataSetMiddleware,
+  validationMiddleWare(carZodValidation.updateCarZodSchema),
+  carController.updateCar
+);
 // router.delete("/:id", authMiddleWare(USER_ROLE.admin), carController.deleteCar);
 router.get("/", carController.findAllCarsByEveryOne);
 router.get(

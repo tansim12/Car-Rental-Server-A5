@@ -5,6 +5,8 @@ import { CarModel } from "./Car.model";
 import QueryBuilder from "../../Builder/QueryBuilder";
 import { carSearchTerm } from "./Car.const";
 import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
+import { UserModel } from "../User/User.model";
+import { USER_STATUS } from "../User/User.const";
 // import { sendImageCloudinary } from "../../Utils/sendImageCloudinary";
 // import mongoose from "mongoose";
 // import { BookingModel } from "../Booking/Booking.model";
@@ -14,7 +16,7 @@ const crateCarDB = async (payload: TCar, files: any) => {
   const filesPathNames = files.map((item: { path: any }) => item.path);
   const imageUrls = await sendImagesToCloudinary(filesPathNames);
   if (!imageUrls?.length) {
-    throw new AppError(httpStatus.BAD_REQUEST,'There is no image file !')
+    throw new AppError(httpStatus.BAD_REQUEST, "There is no image file !");
   }
   const newPayload = {
     ...payload,
@@ -70,23 +72,63 @@ const findAllCarsByEveryOneDB = async (queryParams: Partial<TCar>) => {
   };
 };
 
-// const updateCarDB = async (id: string, payload: Partial<TCar>) => {
-//   const isExists = await CarModel.findById(id);
-//   if (!isExists) {
-//     throw new AppError(404, "No Data Found !");
-//   }
+const updateCarDB = async (
+  id: string,
+  payload: Partial<TCar>,
+  userId: string,
+  files: any
+) => {
+  const user = await UserModel.findById({ _id: userId }).select(
+    "role status isDelete"
+  );
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Delete");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
+  }
+  const car = await CarModel.findById(id);
+  if (!car) {
+    throw new AppError(404, "No Data Found !");
+  }
+  if (car?.isDelete) {
+    throw new AppError(404, "This Car Already Delete");
+  }
+  const previousCarImagesGetsPayload = payload?.images as string[];
+  const previousImageByDB = car?.images;
 
-//   const result = await CarModel.findByIdAndUpdate(id, payload, {
-//     new: true,
-//     upsert: true,
-//     runValidators: true,
-//   });
-//   if (result) {
-//     return result;
-//   } else {
-//     throw new AppError(httpStatus.FORBIDDEN, "Car Update failed !");
-//   }
-// };
+  const newPayload = { ...payload };
+  if (files?.length) {
+    const filesPathNames = files.map((item: { path: any }) => item.path);
+    const imageUrls = await sendImagesToCloudinary(filesPathNames);
+    if (imageUrls?.length) {
+      if (previousCarImagesGetsPayload) {
+        newPayload.images = [...previousCarImagesGetsPayload, ...imageUrls];
+      } else if (previousImageByDB) {
+        newPayload.images = [...previousImageByDB, ...imageUrls];
+      }
+    } else {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Cloudinary Image Hosting problem "
+      );
+    }
+  }
+
+  const result = await CarModel.findByIdAndUpdate(id, newPayload, {
+    new: true,
+    upsert: true,
+    runValidators: true,
+  });
+  if (result) {
+    return result;
+  } else {
+    throw new AppError(httpStatus.FORBIDDEN, "Car Update failed !");
+  }
+};
 // const deleteCarDB = async (id: string) => {
 //   const isExists = await CarModel.findById(id);
 //   if (!isExists) {
@@ -172,7 +214,7 @@ export const carService = {
   findOneCarDB,
   findAllCarsByAdminOneDB,
   findAllCarsByEveryOneDB,
-  // updateCarDB,
+  updateCarDB,
   // deleteCarDB,
   // carReturnDB,
 };

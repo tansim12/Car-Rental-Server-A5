@@ -276,9 +276,6 @@ const updateBookingDB = async (
           "Please Select StartDate and EndDate"
         );
       }
-
-      console.log({ payload });
-
       const result = await BookingModel.findByIdAndUpdate(
         { _id: id },
         {

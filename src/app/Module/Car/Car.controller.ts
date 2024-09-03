@@ -39,22 +39,19 @@ const findAllCarsByEveryOne: RequestHandler = async (req, res, next) => {
   }
 };
 
-// const updateCar: RequestHandler = async (req, res, next) => {
-//   try {
-//     const result = await carService.updateCarDB(req.params.id, req.body);
-//     res.send(successResponse(result, 200, "Car updated successfully"));
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-// const deleteCar: RequestHandler = async (req, res, next) => {
-//   try {
-//     const result = await carService.deleteCarDB(req.params.id);
-//     res.send(successResponse(result, 200, "Car Deleted successfully"));
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+const updateCar: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await carService.updateCarDB(
+      req.params?.id,
+      req.body,
+      req?.user?.id,
+      req?.files
+    );
+    res.send(successResponse(result, 200, "Car updated successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
 
 // const carReturn: RequestHandler = async (req, res, next) => {
 //   try {
@@ -69,7 +66,7 @@ export const carController = {
   findOneCar,
   findAllCarsByAdmin,
   findAllCarsByEveryOne,
-  // updateCar,
+  updateCar,
   // deleteCar,
   // carReturn,
 };
