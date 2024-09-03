@@ -7,7 +7,8 @@ import { USER_ROLE, USER_STATUS } from "./User.const";
 const updateProfileDB = async (
   id: string,
   body: Partial<TUser>,
-  tokenGetsId: string
+  tokenGetsId: string,
+  tokenGetsRole :string
 ) => {
   const user = await UserModel.findById(id).select("+password");
   const tokenIdByUser = await UserModel.findById({ _id: tokenGetsId }).select(
@@ -38,10 +39,15 @@ const updateProfileDB = async (
       "Your Can not change password !"
     );
   }
+
   if (body?.email) {
     throw new AppError(httpStatus.BAD_REQUEST, "Your Can not change email !");
   }
 
+
+  if (tokenGetsRole === USER_ROLE.user && tokenGetsId.toString() !== id) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Your can't change Other user info");
+  }
   const result = await UserModel.findByIdAndUpdate(
     id,
     {
@@ -51,7 +57,6 @@ const updateProfileDB = async (
     },
     { upsert: true, new: true }
   ).select("+password");
-
   return result;
 };
 

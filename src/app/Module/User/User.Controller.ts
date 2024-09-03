@@ -10,7 +10,8 @@ const updateProfile: RequestHandler = async (req, res, next) => {
     const result = await userService.updateProfileDB(
       userId,
       req?.body,
-      tokenGetsId
+      tokenGetsId,
+      req.user?.role
     );
     res
       .status(201)
