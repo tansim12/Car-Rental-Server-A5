@@ -45,6 +45,12 @@ const paymentDB = async (body: any, userId: string) => {
   if (booking.isDelete) {
     throw new AppError(httpStatus.NOT_FOUND, "This Booking Already Delete !");
   }
+  if (booking.adminApprove === 3) {
+    throw new AppError(httpStatus.NOT_FOUND, "Admin reject your booking !");
+  }
+  if (booking.orderCancel === true) {
+    throw new AppError(httpStatus.NOT_FOUND, "You already cancel your booking order !");
+  }
 
   const carData: TCarId =
     typeof booking?.carId === "object" &&
