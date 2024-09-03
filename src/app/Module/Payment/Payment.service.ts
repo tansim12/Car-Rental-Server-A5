@@ -5,7 +5,6 @@ import AppError from "../../Error-Handle/AppError";
 import httpStatus from "http-status";
 import { USER_STATUS } from "../User/User.const";
 import { BookingModel } from "../Booking/Booking.model";
-import { CARAVAILABLE } from "../Car/Car.const";
 dotenv.config();
 import { v7 as uuidv7 } from "uuid";
 import { verifyPayment } from "../../Utils/verifyPayment";
@@ -62,9 +61,6 @@ const paymentDB = async (body: any, userId: string) => {
       : undefined;
 
   if (carData) {
-    if (carData?.availability === CARAVAILABLE.unavailable) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Car Is Unavailable Now !");
-    }
     if (carData?.isDelete) {
       throw new AppError(httpStatus.BAD_REQUEST, "This Car Already Delete ! !");
     }

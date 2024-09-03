@@ -294,17 +294,71 @@ const updateBookingDB = async (
     }
   }
 
-  const result = await BookingModel.findByIdAndUpdate(
-    { _id: id },
-    {
-      $set: { ...body },
-    },
-    { new: true, upsert: true }
-  );
-  if (!result) {
-    throw new AppError(httpStatus.NOT_FOUND, "Booking Update Failed");
+  if (user?.role === USER_ROLE.admin) {
+    const car = await CarModel.findById({ _id: booking?.carId }).select(
+      "isDelete availability _id"
+    );
+    if (!car) {
+      throw new AppError(httpStatus.BAD_REQUEST, "This Car Data Not Found !");
+    }
+    if (car?.isDelete) {
+      throw new AppError(httpStatus.BAD_REQUEST, "This Car Already Delete !");
+    }
+    if (body?.adminApprove === 1) {
+      const carUpdateResult = await CarModel.findByIdAndUpdate(
+        { _id: car?._id },
+        { availability: CARAVAILABLE.unavailable },
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).select("_id");
+      if (!carUpdateResult) {
+        throw new AppError(
+          httpStatus.CONFLICT,
+          "Admin Status 1 but car is not update unavailable"
+        );
+      }
+      const result = await BookingModel.findByIdAndUpdate(
+        { _id: id },
+        {
+          $set: { ...body },
+        },
+        { new: true, upsert: true }
+      );
+      if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "Booking Update Failed");
+      }
+      return result;
+    }
+    if (body?.adminApprove === 2) {
+      const carUpdateResult = await CarModel.findByIdAndUpdate(
+        { _id: car?._id },
+        { availability: CARAVAILABLE.available },
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).select("_id");
+      if (!carUpdateResult) {
+        throw new AppError(
+          httpStatus.CONFLICT,
+          "Admin Status 2 but car is not update available"
+        );
+      }
+      const result = await BookingModel.findByIdAndUpdate(
+        { _id: id },
+        {
+          $set: { ...body },
+        },
+        { new: true, upsert: true }
+      );
+      if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "Booking Update Failed");
+      }
+      return result;
+    }
   }
-  return result;
 };
 
 export const bookingsService = {

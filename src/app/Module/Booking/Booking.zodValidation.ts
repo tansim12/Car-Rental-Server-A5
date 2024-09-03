@@ -104,8 +104,22 @@ const updateBookingZodSchema = z.object({
       .string()
       .min(6, { message: "OTP must be at least 6 characters long." })
       .optional(),
-    paymentStatus: z.enum(["0", "1", "2"]).transform(Number).optional(),
-    adminApprove: z.enum(["0", "1", "2", "3"]).transform(Number).optional(),
+    // paymentStatus: z.enum(["0", "1", "2"]).transform(Number).optional(),
+    paymentStatus: z
+      .union([z.literal(0), z.literal(1), z.literal(2)])
+      .optional()
+      .refine((val) => [0, 1, 2].includes(val!), {
+        message: "paymentStatus must be one of the following values: 0, 1, 2.",
+      })
+      .optional(),
+    adminApprove: z
+      .union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)])
+      .optional()
+      .refine((val) => [0, 1, 2, 3].includes(val!), {
+        message:
+          "adminApprove must be one of the following values: 0, 1, 2, 3.",
+      })
+      .optional(),
     advancePaymentInfo: PaymentInfoSchema.optional(),
     deuPaymentInfo: PaymentInfoSchema.optional(),
   }),
