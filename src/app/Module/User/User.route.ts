@@ -17,5 +17,6 @@ router.get(
   authMiddleWare(USER_ROLE.admin, USER_ROLE.user),
   userController.getSingleUser
 );
+router.get("/", authMiddleWare(USER_ROLE.admin), userController.findAllUser);
 
 export const userRoutes = router;

@@ -2,7 +2,8 @@ import httpStatus from "http-status";
 import AppError from "../../Error-Handle/AppError";
 import { TUser } from "./User.interface";
 import { UserModel } from "./User.model";
-import { USER_ROLE, USER_STATUS } from "./User.const";
+import { USER_ROLE, USER_STATUS, userSearchTerm } from "./User.const";
+import QueryBuilder from "../../Builder/QueryBuilder";
 
 const updateProfileDB = async (
   id: string,
@@ -66,11 +67,15 @@ const updateProfileDB = async (
   return result;
 };
 
-const getSingleUserDB = async (tokenUserId: string, paramsUserId:string) => {
-  if (tokenUserId.toString() !== paramsUserId) {
-    throw new AppError(httpStatus.BAD_REQUEST, "You Can't find This User");
+const getSingleUserDB = async (tokenUserId: string, paramsUserId: string) => {
+  const user = await UserModel.findById({ _id: tokenUserId }).select(
+    "+password"
+  );
+  if (user?.role === USER_ROLE.user) {
+    if (tokenUserId.toString() !== paramsUserId) {
+      throw new AppError(httpStatus.BAD_REQUEST, "You Can't find This User");
+    }
   }
-  const user = await UserModel.findById({ _id: tokenUserId }).select("+password");
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found !");
   }
@@ -86,8 +91,47 @@ const getSingleUserDB = async (tokenUserId: string, paramsUserId:string) => {
 
   return user;
 };
+const findAllUserDB = async (
+  tokenUserId: string,
+  queryParams: Partial<TUser>
+) => {
+  const user = await UserModel.findById({ _id: tokenUserId }).select(
+    "+password"
+  );
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found !");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This User Is Already Blocked !"
+    );
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Is Already Delete !");
+  }
+  if (user?.role !== USER_ROLE.admin) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You Can't Access This Route.Only Admin Access Here !"
+    );
+  }
+
+  const queryUser = new QueryBuilder(UserModel.find(), queryParams)
+    .filter()
+    .paginate()
+    .search(userSearchTerm)
+    .sort()
+    .fields();
+  const result = await queryUser.modelQuery;
+
+  const meta = await queryUser.countTotal();
+
+  return { meta, result };
+};
 
 export const userService = {
   updateProfileDB,
   getSingleUserDB,
+  findAllUserDB,
 };

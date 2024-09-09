@@ -37,8 +37,28 @@ const getSingleUser: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const findAllUser: RequestHandler = async (req, res, next) => {
+  const tokenGetsId = req?.user?.id;
+  const query = req?.query;
+
+  try {
+    const result = await userService.findAllUserDB(tokenGetsId, query);
+    res
+      .status(201)
+      .send(
+        successResponse(
+          result,
+          httpStatus.OK,
+          "All User Find Successfully Done"
+        )
+      );
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const userController = {
   updateProfile,
   getSingleUser,
+  findAllUser,
 };
