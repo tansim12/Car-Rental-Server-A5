@@ -360,6 +360,36 @@ const updateBookingDB = async (
       }
       return result;
     }
+    // admin cancel the booking order
+    if (body?.adminApprove === 3) {
+      const carUpdateResult = await CarModel.findByIdAndUpdate(
+        { _id: car?._id },
+        {
+          $set: { ...body },
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).select("_id");
+      if (!carUpdateResult) {
+        throw new AppError(
+          httpStatus.CONFLICT,
+          "Admin Status 2 but car is not update available"
+        );
+      }
+      const result = await BookingModel.findByIdAndUpdate(
+        { _id: id },
+        {
+          $set: { ...body },
+        },
+        { new: true, upsert: true }
+      );
+      if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "Booking Update Failed");
+      }
+      return result;
+    }
   }
 };
 
