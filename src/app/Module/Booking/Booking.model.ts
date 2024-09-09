@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import { TBookings, TPaymentInfo } from "./Booking.interface";
+import { carAvailableAreaArray } from "../Car/Car.const";
 
 const PaymentInfoSchema = new Schema<TPaymentInfo>({
   mer_txnid: { type: String, required: true },
@@ -14,6 +15,16 @@ const bookingSchema = new Schema<TBookings>(
     carId: {
       type: Schema.Types.ObjectId,
       ref: "Car",
+      required: true,
+    },
+    pickupArea: {
+      type: String,
+      enum: carAvailableAreaArray,
+      required: true,
+    },
+    dropOffArea: {
+      type: String,
+      enum: carAvailableAreaArray,
       required: true,
     },
     startDate: {

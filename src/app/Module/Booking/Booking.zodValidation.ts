@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { carAvailableAreaArray } from "../Car/Car.const";
 
 // Define a Zod schema for the date format (YYYY-MM-DD)
 const dateSchema = z
@@ -20,13 +21,25 @@ const PaymentInfoSchema = z.object({
   payment_type: z.string().nonempty({ message: "Payment type is required" }),
   approval_code: z.string().nonempty({ message: "Approval code is required" }),
 });
-
+const pickupAreaSchema = z.enum(
+  carAvailableAreaArray as [string, ...string[]],
+  {
+    errorMap: () => ({ message: "Invalid pickup car Available Area " }),
+  }
+);
+const dropOffAreaSchema = z.enum(
+  carAvailableAreaArray as [string, ...string[]],
+  {
+    errorMap: () => ({ message: "Invalid dropOff car Available Area " }),
+  }
+);
 const bookingCreatingValidationSchemaZod = z.object({
   body: z.object({
     carId: z.string().refine((val) => Types.ObjectId.isValid(val), {
       message: "Invalid car ID",
     }),
-
+    pickupArea: pickupAreaSchema,
+    dropOffArea: dropOffAreaSchema,
     startDate: dateSchema,
     endDate: dateSchema,
     userId: z
@@ -72,7 +85,8 @@ const updateBookingZodSchema = z.object({
         message: "Invalid car ID",
       })
       .optional(),
-
+      pickupArea: pickupAreaSchema.optional(),
+      dropOffArea: dropOffAreaSchema.optional(),
     startDate: dateSchema.optional(),
     endDate: dateSchema.optional(),
     userId: z

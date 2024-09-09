@@ -203,7 +203,7 @@ const updateBookingDB = async (
 ) => {
   const booking = await BookingModel.findById(id);
   const user = await UserModel.findById({ _id: userId });
-  const { startDate, endDate, orderCancel } = body;
+  const { startDate, endDate, orderCancel, dropOffArea, pickupArea } = body;
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
@@ -245,7 +245,9 @@ const updateBookingDB = async (
     if (
       (startDate && endDate) ||
       orderCancel === true ||
-      orderCancel === false
+      orderCancel === false ||
+      dropOffArea ||
+      pickupArea
     ) {
       const car = await CarModel.findById({ _id: booking?.carId });
       const advancePayment = car?.advance as number;
@@ -283,13 +285,13 @@ const updateBookingDB = async (
         },
         { new: true, upsert: true }
       ).select(
-        "_id startDate endDate deuPayment rentalPricePerDay advancePayment orderCancel totalCost"
+        "_id startDate endDate deuPayment rentalPricePerDay advancePayment orderCancel totalCost dropOffArea pickupArea"
       );
       return result;
     } else {
       throw new AppError(
         httpStatus.BAD_GATEWAY,
-        "You can change start date, end date,orderCancel "
+        "You can change start date, end date,orderCancel,pickupArea,dropOffArea "
       );
     }
   }

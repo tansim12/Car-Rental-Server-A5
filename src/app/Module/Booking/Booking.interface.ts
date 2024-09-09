@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { TAvailableArea } from "../Car/Car.interface";
 
 export type TPaymentInfo = {
   mer_txnid: string;
@@ -11,6 +12,8 @@ export type TPaymentInfo = {
 
 export interface TBookings {
   carId: Types.ObjectId;
+  pickupArea: TAvailableArea;
+  dropOffArea: TAvailableArea;
   startDate: string;
   endDate: string;
   userId?: Types.ObjectId;
