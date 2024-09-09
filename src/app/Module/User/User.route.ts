@@ -12,5 +12,10 @@ router.put(
   validationMiddleWare(UserZodValidation.userUpdateValidationSchemaZod),
   userController.updateProfile
 );
+router.get(
+  "/:userId",
+  authMiddleWare(USER_ROLE.admin, USER_ROLE.user),
+  userController.getSingleUser
+);
 
 export const userRoutes = router;

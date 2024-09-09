@@ -31,7 +31,10 @@ const updateProfileDB = async (
     tokenIdByUser?.status === USER_STATUS?.block ||
     tokenIdByUser?.isDelete === true
   ) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Your Can not change Role or status!");
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Your Can not change Role or status!"
+    );
   }
 
   if (body?.password) {
@@ -63,6 +66,28 @@ const updateProfileDB = async (
   return result;
 };
 
+const getSingleUserDB = async (tokenUserId: string, paramsUserId:string) => {
+  if (tokenUserId.toString() !== paramsUserId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "You Can't find This User");
+  }
+  const user = await UserModel.findById({ _id: tokenUserId }).select("+password");
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found !");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This User Is Already Blocked !"
+    );
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Is Already Delete !");
+  }
+
+  return user;
+};
+
 export const userService = {
   updateProfileDB,
+  getSingleUserDB,
 };
