@@ -30,16 +30,28 @@ class QueryBuilder2<T> {
     const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
     excludeFields.forEach((el) => delete queryObj[el]);
   
-    // Handle `availableAreas` filter
+    // Handle `availableAreas` as an array of values
     if (queryObj.availableAreas && typeof queryObj.availableAreas === "string") {
-      // Split string into an array and apply `$in` filter
       const areasArray = (queryObj.availableAreas as string).split(" ");
       queryObj.availableAreas = { $in: areasArray };
+    }
+  
+    // Handle `availability` as an array of values
+    if (queryObj.availability && typeof queryObj.availability === "string") {
+      const availabilityArray = (queryObj.availability as string).split(" ");
+      queryObj.availability = { $in: availabilityArray };
+    }
+  
+    // Handle `category` as an array of values (if applicable)
+    if (queryObj.category && typeof queryObj.category === "string") {
+      const categoryArray = (queryObj.category as string).split(" ");
+      queryObj.category = { $in: categoryArray };
     }
   
     this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
     return this;
   }
+  
 
   sort() {
     let sort = "-createdAt";
