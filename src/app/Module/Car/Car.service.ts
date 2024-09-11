@@ -7,7 +7,7 @@ import QueryBuilder from "../../Builder/QueryBuilder";
 import { carSearchTerm } from "./Car.const";
 import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
 import { UserModel } from "../User/User.model";
-import { USER_STATUS } from "../User/User.const";
+import { USER_ROLE, USER_STATUS } from "../User/User.const";
 // import { sendImageCloudinary } from "../../Utils/sendImageCloudinary";
 // import mongoose from "mongoose";
 // import { BookingModel } from "../Booking/Booking.model";
@@ -27,13 +27,16 @@ const crateCarDB = async (payload: TCar, files: any) => {
   const result = await CarModel.create(newPayload);
   return result;
 };
-const findOneCarDB = async (id: string) => {
+const findOneCarDB = async (id: string, userRole: string) => {
   const result = await CarModel.findById(id);
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "No Data Found !");
   }
-  if (result?.isDelete) {
-    throw new AppError(404, "This Carl Already Deleted !");
+
+  if (userRole !== USER_ROLE.admin) {
+    if (result?.isDelete) {
+      throw new AppError(404, "This Car Already Deleted !");
+    }
   }
   return result;
 };

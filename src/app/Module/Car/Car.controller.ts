@@ -16,7 +16,7 @@ const createCar: RequestHandler = async (req, res, next) => {
 };
 const findOneCar: RequestHandler = async (req, res, next) => {
   try {
-    const result = await carService.findOneCarDB(req.params.id);
+    const result = await carService.findOneCarDB(req.params.id, req?.user?.role);
     res.send(successResponse(result, 200, "A Car retrieved successfully"));
   } catch (error) {
     next(error);

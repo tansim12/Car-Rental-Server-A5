@@ -37,6 +37,6 @@ router.get(
   authMiddleWare(USER_ROLE.admin),
   carController.findAllCarsByAdmin
 );
-router.get("/:id", carController.findOneCar);
+router.get("/:id",authMiddleWare(USER_ROLE.user, USER_ROLE.admin), carController.findOneCar);
 
 export const carRoutes = router;
