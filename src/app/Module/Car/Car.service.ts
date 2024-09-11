@@ -8,6 +8,7 @@ import { carSearchTerm } from "./Car.const";
 import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
 import { UserModel } from "../User/User.model";
 import { USER_ROLE, USER_STATUS } from "../User/User.const";
+import QueryBuilder2 from "../../Builder/QueryBuilder2";
 // import { sendImageCloudinary } from "../../Utils/sendImageCloudinary";
 // import mongoose from "mongoose";
 // import { BookingModel } from "../Booking/Booking.model";
@@ -58,7 +59,7 @@ const findAllCarsByAdminOneDB = async (queryParams: Partial<TCar>) => {
 };
 
 const findAllCarsByEveryOneDB = async (queryParams: Partial<TCar>) => {
-  const carQuery = new QueryBuilder(
+  const carQuery = new QueryBuilder2(
     CarModel.find({ isDelete: false }),
     queryParams
   )

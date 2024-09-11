@@ -39,4 +39,8 @@ export const carSearchTerm = [
   "brand",
   "category",
   "name",
+  "availableAreas",
+  "availability",
+  "licensePlate",
+  "VIN",
 ];
