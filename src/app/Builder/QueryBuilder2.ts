@@ -65,7 +65,7 @@ class QueryBuilder2<T> {
 
   paginate() {
     // limit section
-    let limit = 10;
+    let limit = 6;
     if (this?.query?.limit) {
       limit = this?.query.limit as number;
     }
