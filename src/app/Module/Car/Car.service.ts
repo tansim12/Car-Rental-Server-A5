@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from "http-status";
 import AppError from "../../Error-Handle/AppError";
 import { TCar } from "./Car.interface";
@@ -93,9 +94,6 @@ const updateCarDB = async (
   const car = await CarModel.findById(id);
   if (!car) {
     throw new AppError(404, "No Data Found !");
-  }
-  if (car?.isDelete) {
-    throw new AppError(404, "This Car Already Delete");
   }
   const previousCarImagesGetsPayload = payload?.images as string[];
   const previousImageByDB = car?.images;
