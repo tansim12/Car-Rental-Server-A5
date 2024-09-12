@@ -187,7 +187,15 @@ const findAllBookingsDB = async (
   }
 
   const carQuery = new QueryBuilder(
-    BookingModel.find({ paymentStatus: 1 }),
+    BookingModel.find({ paymentStatus: 1 })
+      .populate({
+        path: "userId",
+        select: "email",
+      })
+      .populate({
+        path: "carId",
+        select: "name images availability",
+      }),
     newQueryParams
   )
     .filter()
