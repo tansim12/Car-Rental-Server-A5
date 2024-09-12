@@ -187,7 +187,7 @@ const findAllBookingsDB = async (
   }
 
   const carQuery = new QueryBuilder(
-    BookingModel.find({ paymentStatus: 1 })
+    BookingModel.find({ $or: [{ paymentStatus: 1 }, { paymentStatus: 2 }] })
       .populate({
         path: "userId",
         select: "email",
@@ -395,6 +395,20 @@ const updateBookingDB = async (
           "Admin Status 2 but car is not update available"
         );
       }
+      const result = await BookingModel.findByIdAndUpdate(
+        { _id: id },
+        {
+          $set: { ...body },
+        },
+        { new: true, upsert: true }
+      );
+      if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "Booking Update Failed");
+      }
+      return result;
+    }
+    // admin cancel the booking order
+    if (body?.isDelete || body?.isDelete === false) {
       const result = await BookingModel.findByIdAndUpdate(
         { _id: id },
         {
