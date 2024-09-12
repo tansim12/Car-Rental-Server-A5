@@ -127,7 +127,7 @@ const findOneMyBookingsDB = async (
   const myBookingQuery = new QueryBuilder(
     BookingModel.find({ userId: id }).populate({
       path: "carId",
-      select:"name images availability"
+      select: "name images availability",
     }),
     queryParams
   )
@@ -189,11 +189,17 @@ const findAllBookingsDB = async (
   const carQuery = new QueryBuilder(
     BookingModel.find({ paymentStatus: 1 }),
     newQueryParams
-  ).filter();
+  )
+    .filter()
+    .fields()
+    .paginate()
+    .sort()
+    .search(bookingUserSearchTram);
   const result = await carQuery.modelQuery;
+  const meta = await carQuery.countTotal();
 
   if (result?.length) {
-    return result;
+    return { meta, result };
   } else {
     throw new AppError(404, "Data Not Found !");
   }
