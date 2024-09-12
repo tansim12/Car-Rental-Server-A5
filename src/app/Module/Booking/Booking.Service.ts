@@ -125,7 +125,10 @@ const findOneMyBookingsDB = async (
   }
 
   const myBookingQuery = new QueryBuilder(
-    BookingModel.find({ userId: id }),
+    BookingModel.find({ userId: id }).populate({
+      path: "carId",
+      select:"name images"
+    }),
     queryParams
   )
     .search(bookingUserSearchTram)
