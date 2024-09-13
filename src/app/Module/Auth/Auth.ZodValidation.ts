@@ -18,6 +18,18 @@ const changePasswordValidationSchemaZod = z.object({
     newPassword: z.string({ required_error: "Password is required" }),
   }),
 });
+const forgetPasswordSchemaZod = z.object({
+  body: z.object({
+    email: z
+      .string()
+      .email({ message: "Email must be a valid email" })
+      .nonempty({ message: "Email is required" }),
+    oldPassword: z.string({
+      required_error: "Old password is required",
+    }),
+    newPassword: z.string({ required_error: "Password is required" }),
+  }),
+});
 
 const refreshTokenValidationSchemaZod = z.object({
   cookies: z.object({
@@ -28,7 +40,8 @@ const refreshTokenValidationSchemaZod = z.object({
 });
 
 export const authZodValidation = {
-    signInValidationSchemaZod,
-    refreshTokenValidationSchemaZod,
-    changePasswordValidationSchemaZod
+  signInValidationSchemaZod,
+  refreshTokenValidationSchemaZod,
+  changePasswordValidationSchemaZod,
+  forgetPasswordSchemaZod,
 };

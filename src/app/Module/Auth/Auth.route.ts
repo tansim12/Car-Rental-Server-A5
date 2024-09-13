@@ -26,6 +26,11 @@ router.post(
   authController.changePassword
 );
 router.post(
+  "/forget-password",
+  validationMiddleWare(authZodValidation.changePasswordValidationSchemaZod),
+  authController.forgetPassword
+);
+router.post(
   "/refresh-token",
   validationMiddleWare(authZodValidation.refreshTokenValidationSchemaZod),
   authController.refreshToken
