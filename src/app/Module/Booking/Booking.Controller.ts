@@ -58,6 +58,16 @@ const adminReturnCarSchedule: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const adminDashboardAggregate: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.adminDashboardAggregateDB(
+      req.user?.id
+    );
+    res.send(successResponse(result, 200, " successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
 const updateBooking: RequestHandler = async (req, res, next) => {
   try {
     const result = await bookingsService.updateBookingDB(
@@ -80,4 +90,5 @@ export const bookingsController = {
   updateBooking,
   userBookingSchedule,
   adminReturnCarSchedule,
+  adminDashboardAggregate,
 };

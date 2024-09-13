@@ -39,5 +39,10 @@ router.get(
   authMiddleWare(USER_ROLE.admin),
   bookingsController.adminReturnCarSchedule
 );
+router.get(
+  "/admin-aggregate-data",
+  authMiddleWare(USER_ROLE.admin),
+  bookingsController.adminDashboardAggregate
+);
 
 export const bookingRoutes = router;

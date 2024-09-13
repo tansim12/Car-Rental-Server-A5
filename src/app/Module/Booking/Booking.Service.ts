@@ -487,9 +487,7 @@ const adminReturnCarScheduleDB = async (tokenUserId: string) => {
     throw new AppError(httpStatus.BAD_REQUEST, "This User Already Blocked");
   }
   const findPaidBooking: any = await BookingModel.find({
-    $or: [
-      { adminApprove: 1 } , { adminApprove: 2 }
-    ],
+    $or: [{ adminApprove: 1 }, { adminApprove: 2 }],
   })
     .populate({
       path: "userId",
@@ -517,6 +515,75 @@ const adminReturnCarScheduleDB = async (tokenUserId: string) => {
 
   return result;
 };
+const adminDashboardAggregateDB = async (tokenUserId: string) => {
+  const user = await UserModel.findById({ _id: tokenUserId }).select("+password");
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.role !== USER_ROLE.admin) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Already Deleted");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User is Already Blocked");
+  }
+
+  // Get admin-approved bookings aggregation
+  const adminApproveBookings = await BookingModel.aggregate([
+    {
+      $match: { adminApprove: 2 }, // Match bookings where adminApprove is 2
+    },
+    {
+      $group: {
+        _id: null, // Group all documents into one result
+        totalBooking: { $sum: 1 }, // Count the total number of bookings
+        totalCost: { $sum: "$totalCost" }, // Sum the total cost of all bookings
+      },
+    },
+  ]);
+  
+  // Get available and unavailable cars aggregation
+  const carAvailable = await CarModel.aggregate([
+    {
+      $match: { availability: { $in: ["available", "unavailable"] } }, // Match cars with 'available' or 'unavailable'
+    },
+    {
+      $group: {
+        _id: null,
+        totalCarAvailable: {
+          $sum: { $cond: [{ $eq: ["$availability", "available"] }, 1, 0] }, // Sum available cars
+        },
+        totalCarUnavailable: {
+          $sum: { $cond: [{ $eq: ["$availability", "unavailable"] }, 1, 0] }, // Sum unavailable cars
+        },
+      },
+    },
+  ]);
+  
+  // Handle empty results from aggregation
+  const bookingsData =
+    adminApproveBookings.length > 0
+      ? adminApproveBookings[0]
+      : { totalBooking: 0, totalCost: 0 };
+  
+  const carsData =
+    carAvailable.length > 0
+      ? carAvailable[0]
+      : { totalCarAvailable: 0, totalCarUnavailable: 0 };
+  
+  // Return merged data
+  return {
+    totalBooking: bookingsData.totalBooking,
+    totalCost: bookingsData.totalCost,
+    totalCarAvailable: carsData.totalCarAvailable,
+    totalCarUnavailable: carsData.totalCarUnavailable,
+  };
+  
+};
+
 
 export const bookingsService = {
   createBookingsDB,
@@ -525,4 +592,5 @@ export const bookingsService = {
   updateBookingDB,
   userBookingScheduleDB,
   adminReturnCarScheduleDB,
+  adminDashboardAggregateDB,
 };
