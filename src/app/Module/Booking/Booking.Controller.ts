@@ -39,11 +39,20 @@ const findOneMyBookings: RequestHandler = async (req, res, next) => {
 };
 const userBookingSchedule: RequestHandler = async (req, res, next) => {
   try {
-    const result = await bookingsService.userBookingScheduleDB(
-      req.user?.id
-    );
+    const result = await bookingsService.userBookingScheduleDB(req.user?.id);
     res.send(
       successResponse(result, 200, "My Bookings Booking Schedule successfully")
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const adminReturnCarSchedule: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.adminReturnCarScheduleDB(req.user?.id);
+    res.send(
+      successResponse(result, 200, " Booking Returned Schedule successfully")
     );
   } catch (error) {
     next(error);
@@ -70,4 +79,5 @@ export const bookingsController = {
   findOneMyBookings,
   updateBooking,
   userBookingSchedule,
+  adminReturnCarSchedule,
 };

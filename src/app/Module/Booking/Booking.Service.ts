@@ -434,10 +434,10 @@ const userBookingScheduleDB = async (tokenUserId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
   }
   if (user?.isDelete) {
-    throw new AppError(httpStatus.NOT_FOUND, "This User Already Delete");
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Already Delete");
   }
   if (user?.status === USER_STATUS.block) {
-    throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Already Blocked");
   }
   const findPaidBooking: any = await BookingModel.find({
     userId: user?.id,
@@ -469,10 +469,60 @@ const userBookingScheduleDB = async (tokenUserId: string) => {
   return result;
 };
 
+const adminReturnCarScheduleDB = async (tokenUserId: string) => {
+  const user = await UserModel.findById({ _id: tokenUserId }).select(
+    "+password"
+  );
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.role !== USER_ROLE.admin) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Already Delete");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This User Already Blocked");
+  }
+  const findPaidBooking: any = await BookingModel.find({
+    $or: [
+      { adminApprove: 1 } , { adminApprove: 2 }
+    ],
+  })
+    .populate({
+      path: "userId",
+      select: "email",
+    })
+    .select("startDate endDate dropOffArea pickupArea");
+  if (!findPaidBooking?.length) {
+    return [];
+  }
+
+  const result = findPaidBooking.map(
+    (event: {
+      userId: {
+        [x: string]: any;
+        name: any;
+      };
+      endDate: string | number | Date;
+      dropOffArea: string;
+      pickupArea: string;
+    }) => ({
+      title: `${event?.userId?.email} ${event?.pickupArea} To ${event?.dropOffArea}`,
+      end: new Date(event.endDate),
+    })
+  );
+
+  return result;
+};
+
 export const bookingsService = {
   createBookingsDB,
   findAllBookingsDB,
   findOneMyBookingsDB,
   updateBookingDB,
   userBookingScheduleDB,
+  adminReturnCarScheduleDB,
 };

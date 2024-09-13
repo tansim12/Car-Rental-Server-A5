@@ -34,5 +34,10 @@ router.get(
   authMiddleWare(USER_ROLE.user),
   bookingsController.userBookingSchedule
 );
+router.get(
+  "/admin-car-return-schedule",
+  authMiddleWare(USER_ROLE.admin),
+  bookingsController.adminReturnCarSchedule
+);
 
 export const bookingRoutes = router;
