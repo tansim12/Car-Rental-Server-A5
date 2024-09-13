@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from "http-status";
 import AppError from "../../Error-Handle/AppError";
@@ -424,9 +425,54 @@ const updateBookingDB = async (
   }
 };
 
+const userBookingScheduleDB = async (tokenUserId: string) => {
+  const user = await UserModel.findById({ _id: tokenUserId }).select(
+    "+password"
+  );
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
+  }
+  if (user?.isDelete) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Delete");
+  }
+  if (user?.status === USER_STATUS.block) {
+    throw new AppError(httpStatus.NOT_FOUND, "This User Already Blocked");
+  }
+  const findPaidBooking: any = await BookingModel.find({
+    userId: user?.id,
+    $or: [{ adminApprove: 1 }, { adminApprove: 2 }],
+  })
+    .populate({
+      path: "carId",
+      select: "name",
+    })
+    .select("adminApprove startDate endDate dropOffArea pickupArea");
+  if (!findPaidBooking?.length) {
+    return [];
+  }
+
+  const result = findPaidBooking.map(
+    (event: {
+      carId: { name: any };
+      startDate: string | number | Date;
+      endDate: string | number | Date;
+      dropOffArea: string;
+      pickupArea: string;
+    }) => ({
+      title: `${event?.carId?.name} ${event?.pickupArea} To ${event?.dropOffArea}`,
+      start: new Date(event.startDate),
+      end: new Date(event.endDate),
+    })
+  );
+
+  return result;
+};
+
 export const bookingsService = {
   createBookingsDB,
   findAllBookingsDB,
   findOneMyBookingsDB,
   updateBookingDB,
+  userBookingScheduleDB,
 };

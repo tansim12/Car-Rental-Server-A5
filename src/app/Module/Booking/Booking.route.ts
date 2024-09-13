@@ -29,5 +29,10 @@ router.get(
   authMiddleWare(USER_ROLE.user),
   bookingsController.findOneMyBookings
 );
+router.get(
+  "/user-booking-schedule",
+  authMiddleWare(USER_ROLE.user),
+  bookingsController.userBookingSchedule
+);
 
 export const bookingRoutes = router;
