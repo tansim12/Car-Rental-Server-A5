@@ -93,8 +93,8 @@ const paymentDB = async (body: any, userId: string) => {
     cus_add2: "N/A",
     cus_city: "N/A",
     cus_country: "Bangladesh",
-    success_url: `${process.env.BASE_URL}api/payment/callback?isAdvancePayment=${isAdvancePayment}&txnId=${combinedTransactionId}&bookingId=${bookingId}`,
-    fail_url: `${process.env.BASE_URL}api/payment/callback`,
+    success_url: `https://assignment-51-l2.vercel.app/api/payment/callback?isAdvancePayment=${isAdvancePayment}&txnId=${combinedTransactionId}&bookingId=${bookingId}`,
+    fail_url: `https://assignment-51-l2.vercel.app/api/payment/callback`,
     cancel_url: `${process.env.FRONTEND_URL}payment-cancel`, // its redirect to frontend directly
     type: "json", //This is must required for JSON request
   };
