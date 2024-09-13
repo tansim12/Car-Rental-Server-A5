@@ -5,7 +5,7 @@ import { TCar } from "./Car.interface";
 import { CarModel } from "./Car.model";
 import QueryBuilder from "../../Builder/QueryBuilder";
 import { carSearchTerm } from "./Car.const";
-import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
+// import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
 import { UserModel } from "../User/User.model";
 import { USER_ROLE, USER_STATUS } from "../User/User.const";
 import QueryBuilder2 from "../../Builder/QueryBuilder2";
@@ -14,15 +14,14 @@ import QueryBuilder2 from "../../Builder/QueryBuilder2";
 // import { BookingModel } from "../Booking/Booking.model";
 // import { timeToHours } from "./Car.utils";
 
-const crateCarDB = async (payload: TCar, files: any) => {
-  const filesPathNames = files.map((item: { path: any }) => item.path);
-  const imageUrls = await sendImagesToCloudinary(filesPathNames);
-  if (!imageUrls?.length) {
-    throw new AppError(httpStatus.BAD_REQUEST, "There is no image file !");
-  }
+const crateCarDB = async (payload: TCar,) => {
+  // const imageUrls = await sendImagesToCloudinary(files);
+
+  // if (!imageUrls?.length) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "There is no image file!");
+  // }
   const newPayload = {
     ...payload,
-    images: imageUrls,
   };
 
   const result = await CarModel.create(newPayload);
@@ -81,8 +80,9 @@ const updateCarDB = async (
   id: string,
   payload: Partial<TCar>,
   userId: string,
-  files: any
 ) => {
+  console.log(payload);
+  
   const user = await UserModel.findById({ _id: userId }).select(
     "role status isDelete"
   );
@@ -99,27 +99,7 @@ const updateCarDB = async (
   if (!car) {
     throw new AppError(404, "No Data Found !");
   }
-  const previousCarImagesGetsPayload = payload?.images as string[];
-  const previousImageByDB = car?.images;
-
   const newPayload = { ...payload };
-  if (files?.length) {
-    const filesPathNames = files.map((item: { path: any }) => item.path);
-    const imageUrls = await sendImagesToCloudinary(filesPathNames);
-    if (imageUrls?.length) {
-      if (previousCarImagesGetsPayload) {
-        newPayload.images = [...previousCarImagesGetsPayload, ...imageUrls];
-      } else if (previousImageByDB) {
-        newPayload.images = [...previousImageByDB, ...imageUrls];
-      }
-    } else {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Cloudinary Image Hosting problem "
-      );
-    }
-  }
-
   const result = await CarModel.findByIdAndUpdate(id, newPayload, {
     new: true,
     upsert: true,

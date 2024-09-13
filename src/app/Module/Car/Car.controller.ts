@@ -1,14 +1,11 @@
 import { RequestHandler } from "express";
 import { carService } from "./Car.service";
 import { successResponse } from "../../Re-Useable/CustomResponse";
-import AppError from "../../Error-Handle/AppError";
 
 const createCar: RequestHandler = async (req, res, next) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      throw new AppError(400, "No files uploaded");
-    }
-    const result = await carService.crateCarDB(req.body, req.files);
+
+    const result = await carService.crateCarDB(req.body,);
     res.send(successResponse(result, 201, "Car created successfully"));
   } catch (error) {
     next(error);
@@ -45,7 +42,6 @@ const updateCar: RequestHandler = async (req, res, next) => {
       req.params?.id,
       req.body,
       req?.user?.id,
-      req?.files
     );
     res.send(successResponse(result, 200, "Car updated successfully"));
   } catch (error) {

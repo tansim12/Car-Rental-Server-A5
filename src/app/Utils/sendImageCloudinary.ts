@@ -1,51 +1,53 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import AppError from "../Error-Handle/AppError";
-import fs from "fs";
-import dotenv from 'dotenv';
-dotenv.config()
+import dotenv from "dotenv";
+import streamifier from "streamifier";
+import { memoryStorage } from "./MemoryStorage";
 
-export const sendImagesToCloudinary = async (paths: string[]) => {
-  // Configuration
-  cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API_KEY,
-    api_secret: process.env.CLOUD_SEC,
-  });
+dotenv.config();
 
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_SEC,
+});
+
+// Function to upload files to Cloudinary directly from memory
+export const sendImagesToCloudinary = async (files: Express.Multer.File[]) => {
   const uploadedUrls: string[] = [];
 
-  for (const path of paths) {
+  for (const file of files) {
     try {
-      // Upload each image
-      const uploadResult = await cloudinary.uploader.upload(path, {
-        public_id: `image_${Date.now()}`,
+      const uploadResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { public_id: `image_${Date.now()}` },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
       });
 
-      // If upload is successful, delete the file from the server
       if (uploadResult) {
-        fs.unlinkSync(path);
-        uploadedUrls.push(uploadResult.secure_url);
+        uploadedUrls.push((uploadResult as any).secure_url);
       }
     } catch (error) {
-      console.log(error);
-      throw new AppError(400, "Cloudinary upload or file deletion went wrong");
+      console.error(error);
+      throw new AppError(400, "Cloudinary upload failed");
     }
   }
 
   return uploadedUrls; // Return an array of uploaded image URLs
 };
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+// Use the custom memory storage for Multer
+const storage = memoryStorage();
 
-    //* should be set folder name  
-    cb(null, process.cwd() + "/uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
-  },
-});
-
-export const upload = multer({ storage: storage });
+export const upload = multer({ storage });

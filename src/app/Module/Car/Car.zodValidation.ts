@@ -71,6 +71,9 @@ const createCarZodSchema = z.object({
     features: z.array(z.string().min(1), {
       errorMap: () => ({ message: "Each feature must be a non-empty string" }),
     }),
+    images: z.array(z.string().min(1), {
+      errorMap: () => ({ message: "Images Required string" }),
+    }),
     safetyFeatures: z.array(z.string().min(1), {
       errorMap: () => ({
         message: "Each safety feature must be a non-empty string",
@@ -106,6 +109,9 @@ const updateFaqSchema = z.object({
 
 const updateCarZodSchema = z.object({
   body: z.object({
+    images: z.array(z.string().min(1), {
+      errorMap: () => ({ message: "Images Required string" }),
+    }).optional(),
     name: z.string().min(1, { message: "Name is required" }).optional(),
     category: updateTCarCategory.optional(),
     brand: z.string().min(1, { message: "Brand is required" }).optional(),
