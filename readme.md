@@ -6,7 +6,7 @@ This is the backend for a Car Rental Reservation System. It handles CRUD operati
 
 ## 🔗 Live URL
 
-[Car Rental Reservation System](https://assignment-3-l2-theta.vercel.app)
+[Car Rental Reservation System](https://assignment-51-l2.vercel.app)
 
 
 ## Technologies Used
@@ -38,7 +38,7 @@ This is the backend for a Car Rental Reservation System. It handles CRUD operati
  **Clone the repository**
 
    ```sh
-   git clone https://github.com/mdrafi276/Car-Rental-Reservation-System-Backend.git
+   git clone 
 
    cd Car-Rental-Reservation-System-Backend
   
