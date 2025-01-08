@@ -33,5 +33,6 @@ router.get(
   carController.findAllCarsByAdmin
 );
 router.get("/:id", carController.findOneCar);
+router.get("/most/booking", carController.mostBookingCar);
 
 export const carRoutes = router;

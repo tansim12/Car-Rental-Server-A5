@@ -7,14 +7,15 @@ import QueryBuilder from "../../Builder/QueryBuilder";
 import { carSearchTerm } from "./Car.const";
 // import { sendImagesToCloudinary } from "../../Utils/sendImageCloudinary";
 import { UserModel } from "../User/User.model";
-import {  USER_STATUS } from "../User/User.const";
+import { USER_STATUS } from "../User/User.const";
 import QueryBuilder2 from "../../Builder/QueryBuilder2";
+import { BookingModel } from "../Booking/Booking.model";
 // import { sendImageCloudinary } from "../../Utils/sendImageCloudinary";
 // import mongoose from "mongoose";
 // import { BookingModel } from "../Booking/Booking.model";
 // import { timeToHours } from "./Car.utils";
 
-const crateCarDB = async (payload: TCar,) => {
+const crateCarDB = async (payload: TCar) => {
   // const imageUrls = await sendImagesToCloudinary(files);
 
   // if (!imageUrls?.length) {
@@ -27,17 +28,16 @@ const crateCarDB = async (payload: TCar,) => {
   const result = await CarModel.create(newPayload);
   return result;
 };
-const findOneCarDB = async (id: string, ) => {
+const findOneCarDB = async (id: string) => {
   const result = await CarModel.findById(id);
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, "No Data Found !");
   }
 
+  if (result?.isDelete) {
+    throw new AppError(404, "This Car Already Deleted !");
+  }
 
-    if (result?.isDelete) {
-      throw new AppError(404, "This Car Already Deleted !");
-    }
-  
   return result;
 };
 
@@ -79,10 +79,10 @@ const findAllCarsByEveryOneDB = async (queryParams: Partial<TCar>) => {
 const updateCarDB = async (
   id: string,
   payload: Partial<TCar>,
-  userId: string,
+  userId: string
 ) => {
   console.log(payload);
-  
+
   const user = await UserModel.findById({ _id: userId }).select(
     "role status isDelete"
   );
@@ -111,6 +111,23 @@ const updateCarDB = async (
     throw new AppError(httpStatus.FORBIDDEN, "Car Update failed !");
   }
 };
+
+const mostBookingCarDB = async () => {
+  const result = await BookingModel.aggregate([
+    { $match: { adminApprove: 2 } },
+    { $group: { _id: "$carId", count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 2 },
+  ]);
+
+  const carIds = result?.map((car) => car._id); // carId এর লিস্ট
+  const carDetails = await CarModel.find({ _id: { $in: carIds } }).sort({
+    createdAt: -1,
+  });
+
+  return carDetails;
+};
+
 // const deleteCarDB = async (id: string) => {
 //   const isExists = await CarModel.findById(id);
 //   if (!isExists) {
@@ -197,6 +214,7 @@ export const carService = {
   findAllCarsByAdminOneDB,
   findAllCarsByEveryOneDB,
   updateCarDB,
+  mostBookingCarDB,
   // deleteCarDB,
   // carReturnDB,
 };
