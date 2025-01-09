@@ -6,6 +6,7 @@ import { carRoutes } from "./app/Module/Car/Car.route";
 import { bookingRoutes } from "./app/Module/Booking/Booking.route";
 import { userRoutes } from "./app/Module/User/User.route";
 import { paymentRoutes } from "./app/Module/Payment/Payment.route";
+import { newsLetterRoutes } from "./app/Module/Newletter/Newsletter.route";
 // import { userRoutes } from "./app/Module/User/User.route";
 
 const app: Application = express();
@@ -18,10 +19,7 @@ app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/payment", paymentRoutes);
-
-
-
-
+app.use("/api/newsLetter", newsLetterRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Level-2 setup ");
