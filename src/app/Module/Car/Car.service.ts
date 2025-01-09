@@ -117,13 +117,13 @@ const mostBookingCarDB = async () => {
     { $match: { adminApprove: 2 } },
     { $group: { _id: "$carId", count: { $sum: 1 } } },
     { $sort: { count: -1 } },
-    { $limit: 2 },
+    { $limit: 3 },
   ]);
 
   const carIds = result?.map((car) => car._id); // carId এর লিস্ট
   const carDetails = await CarModel.find({ _id: { $in: carIds } }).sort({
     createdAt: -1,
-  });
+  }).select("name images category rentalPricePerDay description rentalPricePerDay");
 
   return carDetails;
 };
