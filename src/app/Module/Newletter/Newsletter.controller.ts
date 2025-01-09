@@ -10,6 +10,14 @@ const newLetterEmailSend: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const findAllNewsLetterEmail: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await newsLetterService.findAllNewsLetterEmailDB();
+    res.send(successResponse(result, 200, "Find all email"));
+  } catch (error) {
+    next(error);
+  }
+};
 const createNewsLetter: RequestHandler = async (req, res, next) => {
   try {
     const result = await newsLetterService.createNewsLetterDB(req?.body);
@@ -19,4 +27,8 @@ const createNewsLetter: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const newsLetterController = { newLetterEmailSend, createNewsLetter };
+export const newsLetterController = {
+  newLetterEmailSend,
+  createNewsLetter,
+  findAllNewsLetterEmail,
+};

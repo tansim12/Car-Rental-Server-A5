@@ -22,8 +22,14 @@ const newLetterEmailSendDB = async (payload: any) => {
 
   return result;
 };
+const findAllNewsLetterEmailDB = async () => {
+  const result = await NewsletterModel.find();
+
+  return result;
+};
 
 export const newsLetterService = {
   newLetterEmailSendDB,
   createNewsLetterDB,
+  findAllNewsLetterEmailDB,
 };
