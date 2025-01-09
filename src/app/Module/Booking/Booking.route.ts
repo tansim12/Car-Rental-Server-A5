@@ -44,5 +44,10 @@ router.get(
   authMiddleWare(USER_ROLE.admin),
   bookingsController.adminDashboardAggregate
 );
+router.get(
+  "/admin/monthly/revenue",
+  authMiddleWare(USER_ROLE.admin),
+  bookingsController.monthRevenue
+);
 
 export const bookingRoutes = router;

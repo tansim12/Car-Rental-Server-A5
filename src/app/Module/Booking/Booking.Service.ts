@@ -516,7 +516,9 @@ const adminReturnCarScheduleDB = async (tokenUserId: string) => {
   return result;
 };
 const adminDashboardAggregateDB = async (tokenUserId: string) => {
-  const user = await UserModel.findById({ _id: tokenUserId }).select("+password");
+  const user = await UserModel.findById({ _id: tokenUserId }).select(
+    "+password"
+  );
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This User Not Found");
@@ -544,7 +546,7 @@ const adminDashboardAggregateDB = async (tokenUserId: string) => {
       },
     },
   ]);
-  
+
   // Get available and unavailable cars aggregation
   const carAvailable = await CarModel.aggregate([
     {
@@ -562,18 +564,18 @@ const adminDashboardAggregateDB = async (tokenUserId: string) => {
       },
     },
   ]);
-  
+
   // Handle empty results from aggregation
   const bookingsData =
     adminApproveBookings.length > 0
       ? adminApproveBookings[0]
       : { totalBooking: 0, totalCost: 0 };
-  
+
   const carsData =
     carAvailable.length > 0
       ? carAvailable[0]
       : { totalCarAvailable: 0, totalCarUnavailable: 0 };
-  
+
   // Return merged data
   return {
     totalBooking: bookingsData.totalBooking,
@@ -581,9 +583,58 @@ const adminDashboardAggregateDB = async (tokenUserId: string) => {
     totalCarAvailable: carsData.totalCarAvailable,
     totalCarUnavailable: carsData.totalCarUnavailable,
   };
-  
 };
 
+const monthRevenueDB = async () => {
+  const revenueByMonth = await BookingModel.aggregate([
+    {
+      $match: {
+        adminApprove: 2, // Filter documents where adminApprove is 2
+      },
+    },
+    {
+      $group: {
+        _id: { $month: "$createdAt" }, // Group by month
+        revenue: { $sum: "$totalCost" }, // Sum the revenue
+      },
+    },
+    {
+      $sort: { _id: 1 }, // Sort by month in ascending order
+    },
+    {
+      $addFields: {
+        monthName: {
+          $arrayElemAt: [
+            [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December",
+            ],
+            { $subtract: ["$_id", 1] }, // Convert month number to index (0-based)
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: "$monthName", // Use the month name
+        revenue: 1, // Include revenue
+      },
+    },
+  ]);
+
+  return revenueByMonth;
+};
 
 export const bookingsService = {
   createBookingsDB,
@@ -593,4 +644,5 @@ export const bookingsService = {
   userBookingScheduleDB,
   adminReturnCarScheduleDB,
   adminDashboardAggregateDB,
+  monthRevenueDB,
 };

@@ -82,6 +82,14 @@ const updateBooking: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const monthRevenue: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.monthRevenueDB();
+    res.send(successResponse(result, 200, "Monthly revenue"));
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const bookingsController = {
   createBookings,
@@ -91,4 +99,5 @@ export const bookingsController = {
   userBookingSchedule,
   adminReturnCarSchedule,
   adminDashboardAggregate,
+  monthRevenue,
 };
