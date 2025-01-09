@@ -10,5 +10,6 @@ router.post(
   authMiddleWare(USER_ROLE.admin),
   newsLetterController.newLetterEmailSend
 );
+router.post("/create", newsLetterController.createNewsLetter);
 
 export const newsLetterRoutes = router;
