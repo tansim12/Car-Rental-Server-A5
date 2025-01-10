@@ -49,5 +49,10 @@ router.get(
   authMiddleWare(USER_ROLE.admin),
   bookingsController.monthRevenue
 );
+router.get(
+  "/user/monthly/cost",
+  authMiddleWare(USER_ROLE.admin, USER_ROLE.user),
+  bookingsController.userMonthlyCost
+);
 
 export const bookingRoutes = router;

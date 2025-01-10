@@ -585,6 +585,21 @@ const adminDashboardAggregateDB = async (tokenUserId: string) => {
   };
 };
 
+const months = [
+  { month: "January", order: 1 },
+  { month: "February", order: 2 },
+  { month: "March", order: 3 },
+  { month: "April", order: 4 },
+  { month: "May", order: 5 },
+  { month: "June", order: 6 },
+  { month: "July", order: 7 },
+  { month: "August", order: 8 },
+  { month: "September", order: 9 },
+  { month: "October", order: 10 },
+  { month: "November", order: 11 },
+  { month: "December", order: 12 },
+];
+
 const monthRevenueDB = async () => {
   const revenueByMonth = await BookingModel.aggregate([
     {
@@ -599,41 +614,66 @@ const monthRevenueDB = async () => {
       },
     },
     {
-      $sort: { _id: 1 }, // Sort by month in ascending order
-    },
-    {
-      $addFields: {
-        monthName: {
-          $arrayElemAt: [
-            [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December",
-            ],
-            { $subtract: ["$_id", 1] }, // Convert month number to index (0-based)
-          ],
-        },
-      },
-    },
-    {
       $project: {
         _id: 0,
-        month: "$monthName", // Use the month name
+        monthNumber: "$_id", // Keep month number
         revenue: 1, // Include revenue
       },
     },
   ]);
 
-  return revenueByMonth;
+  // Combine with all months
+  const completeRevenueByMonth = months.map((month) => {
+    const found = revenueByMonth.find(
+      (item) => item.monthNumber === month.order
+    );
+    return {
+      month: month.month,
+      revenue: found ? found.revenue : 0, // Use found revenue or default to 0
+    };
+  });
+
+  return completeRevenueByMonth;
+};
+const userMonthlyCostDB = async (id: string) => {
+  const isExistUser = await UserModel.findById(id);
+  if (!isExistUser?._id || isExistUser?.isDelete === true) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This user not exist");
+  }
+  const revenueByMonth = await BookingModel.aggregate([
+    {
+      $match: {
+        userId: isExistUser?._id,
+        adminApprove: 2, // Filter documents where adminApprove is 2
+      },
+    },
+    {
+      $group: {
+        _id: { $month: "$createdAt" }, // Group by month
+        revenue: { $sum: "$totalCost" }, // Sum the revenue
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        monthNumber: "$_id", // Keep month number
+        revenue: 1, // Include revenue
+      },
+    },
+  ]);
+
+  // Combine with all months
+  const completeRevenueByMonth = months.map((month) => {
+    const found = revenueByMonth.find(
+      (item) => item.monthNumber === month.order
+    );
+    return {
+      month: month.month,
+      revenue: found ? found.revenue : 0, // Use found revenue or default to 0
+    };
+  });
+
+  return completeRevenueByMonth;
 };
 
 export const bookingsService = {
@@ -645,4 +685,5 @@ export const bookingsService = {
   adminReturnCarScheduleDB,
   adminDashboardAggregateDB,
   monthRevenueDB,
+  userMonthlyCostDB,
 };

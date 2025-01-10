@@ -90,6 +90,14 @@ const monthRevenue: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const userMonthlyCost: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.userMonthlyCostDB(req?.user?.id);
+    res.send(successResponse(result, 200, "user Monthly revenue"));
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const bookingsController = {
   createBookings,
@@ -100,4 +108,5 @@ export const bookingsController = {
   adminReturnCarSchedule,
   adminDashboardAggregate,
   monthRevenue,
+  userMonthlyCost,
 };
