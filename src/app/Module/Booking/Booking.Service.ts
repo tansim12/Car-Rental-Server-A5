@@ -680,6 +680,7 @@ const userPaymentStatusDataDB = async (id: string) => {
   if (!isExistUser?._id || isExistUser?.isDelete === true) {
     throw new AppError(httpStatus.BAD_REQUEST, "This user not exist");
   }
+
   const paymentStatusData = await BookingModel.aggregate([
     {
       $match: {
@@ -689,7 +690,7 @@ const userPaymentStatusDataDB = async (id: string) => {
     {
       $group: {
         _id: "$paymentStatus", // Group by paymentStatus
-        count: { $sum: 1 }, // Count the number of documents
+        count: { $sum: 1 },    // Count the number of documents
       },
     },
     {
@@ -712,8 +713,23 @@ const userPaymentStatusDataDB = async (id: string) => {
     },
   ]);
 
-  return paymentStatusData;
+  // Create an array of objects with default 0 values
+  const result = [
+    { name: "Pending", value: 0 },
+    { name: "Advance", value: 0 },
+    { name: "Complete", value: 0 },
+  ];
+
+  // Update the result array with the data from the aggregation if available
+  paymentStatusData.forEach((item) => {
+    if (item._id === "Pending") result[0].value = item.count;
+    if (item._id === "Advance") result[1].value = item.count;
+    if (item._id === "Complete") result[2].value = item.count;
+  });
+
+  return result;
 };
+
 
 export const bookingsService = {
   createBookingsDB,
