@@ -98,6 +98,14 @@ const userMonthlyCost: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+const userPaymentStatusData: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await bookingsService.userPaymentStatusDataDB(req?.user?.id);
+    res.send(successResponse(result, 200, "user payment status data"));
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const bookingsController = {
   createBookings,
@@ -109,4 +117,5 @@ export const bookingsController = {
   adminDashboardAggregate,
   monthRevenue,
   userMonthlyCost,
+  userPaymentStatusData,
 };

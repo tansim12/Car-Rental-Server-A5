@@ -54,5 +54,10 @@ router.get(
   authMiddleWare(USER_ROLE.admin, USER_ROLE.user),
   bookingsController.userMonthlyCost
 );
+router.get(
+  "/user/payment/status",
+  authMiddleWare(USER_ROLE.admin, USER_ROLE.user),
+  bookingsController.userPaymentStatusData
+);
 
 export const bookingRoutes = router;

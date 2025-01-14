@@ -675,6 +675,45 @@ const userMonthlyCostDB = async (id: string) => {
 
   return completeRevenueByMonth;
 };
+const userPaymentStatusDataDB = async (id: string) => {
+  const isExistUser = await UserModel.findById(id);
+  if (!isExistUser?._id || isExistUser?.isDelete === true) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This user not exist");
+  }
+  const paymentStatusData = await BookingModel.aggregate([
+    {
+      $match: {
+        userId: isExistUser?._id,
+      },
+    },
+    {
+      $group: {
+        _id: "$paymentStatus", // Group by paymentStatus
+        count: { $sum: 1 }, // Count the number of documents
+      },
+    },
+    {
+      $project: {
+        _id: {
+          $switch: {
+            branches: [
+              { case: { $eq: ["$_id", 0] }, then: "Pending" },
+              { case: { $eq: ["$_id", 1] }, then: "Advance" },
+              { case: { $eq: ["$_id", 2] }, then: "Complete" },
+            ],
+            default: "Unknown", // Default case if the paymentStatus is not 0, 1, or 2
+          },
+        },
+        count: 1,
+      },
+    },
+    {
+      $sort: { count: -1 }, // Optional: Sort by count in descending order
+    },
+  ]);
+
+  return paymentStatusData;
+};
 
 export const bookingsService = {
   createBookingsDB,
@@ -686,4 +725,5 @@ export const bookingsService = {
   adminDashboardAggregateDB,
   monthRevenueDB,
   userMonthlyCostDB,
+  userPaymentStatusDataDB,
 };
